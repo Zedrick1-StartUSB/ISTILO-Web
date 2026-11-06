@@ -4,103 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f8f5ef">
-    <title>Admin Panel</title>
+    <title>Admin Panel | Istilo@Nasugbu Enterprises</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
     <link rel="stylesheet" href="admin_panel.css">
 </head>
 <body>
-    <div class="invoice-app">
-        <header class="admin-topbar">
-            <a class="brand" href="admin_panel.html">
-                <span>Istilo@Nasugbu Enterprises</span>
-            </a>
-            <span class="workspace-label">ADMIN WORKSPACE</span>
+    <div class="admin-app">
+        <header class="topbar">
+            <a class="brand" href="#create-invoice">Istilo@Nasugbu Enterprises</a>
+            <span class="workspace-label"><span></span> ADMIN WORKSPACE</span>
         </header>
 
-        <main class="invoice-main">
-            <header class="page-top">
+        <main class="page-container">
+            <header class="page-heading">
                 <div>
-                    <h1>Create an invoice for Job Order</h1>
-                    <p class="page-description">Add customer and product details to prepare a new order.</p>
+                    <p class="eyebrow">ORDER MANAGEMENT</p>
+                    <h1>Invoices</h1>
+                    <p class="heading-copy">Create a new job order invoice or check one you made earlier.</p>
                 </div>
+                <span class="date-stamp">📅 &nbsp;November 2026</span>
             </header>
-            <!-- TODO: add realistic data information from the business  -->
-            <form action="" method="get">
+<div class="view-switch" role="tablist" aria-label="Invoice pages">
+    <input class="view-radio" type="radio" name="invoice-view" id="view-create" checked>
+    <input class="view-radio" type="radio" name="invoice-view" id="view-logs">
+    <div class="view-buttons">
+        <label class="view-button" for="view-create" role="tab">＋ &nbsp;Create invoice</label>
+        <label class="view-button" for="view-logs" role="tab">▤ &nbsp;Invoice logs</label>
+    </div>
+
+    <div class="view-panels">
+        <section class="view-panel create-panel" id="create-invoice" role="tabpanel" aria-labelledby="view-create">
+            <div class="form-intro">
+                <span class="intro-icon">✎</span>
                 <div>
-                    <div class="form-column">
-                        <section class="form-card">
-                            <div class="card-heading">
-                                <span class="step-number">01</span>
-                                <div>
-                                    <h2 id="customer-heading">Customer details</h2>
-                                    <p class="color-black">Customer Information Regarding this order</p>
+                                <p class="panel-kicker">NEW JOB ORDER</p>
+                                <h2>Create invoice</h2>
+                                <p>Enter the customer and job order details below.</p>
                                 </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="customer-name" class="form-label">Customer name</label>
-                                    <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="e.g. Ava Mitchell" autocomplete="name" required>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="customer-email" class="form-label">Contact Number</label>
-                                    <input type="text" class="form-control" id="customer-number" name="customer_number" placeholder="09123456689" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="shipping-address" class="form-label">Shipping address</label>
-                                    <input type="text" class="form-control" id="shipping-address" name="shipping_address" placeholder="Street, city, and postcode" autocomplete="street-address">
-                                </div>
-                                <div class="col-12">
-                                    <label for="land-marks" class="form-label">Remarkable Land marks</label>
-                                    <input type="text" class="form-control" placeholder="Near something">
-                                </div>
-                            </div>
-                        </section>
-
-                        <section class="form-card item-card">
-                            <div class="card-heading item-heading">
-                                <span class="step-number">02</span>
-                                <div>
-                                    <h2 id="items-heading">Order items</h2>
-                                    <p>Add the products going into this order.</p>
-                                </div>
-                                <span class="item-count">1 item</span>
-                            </div>
-
-                            <div class="items-labels" aria-hidden="true">
-                                <span class="form-label">PRODUCT</span>
-                                <span class="form-label">QTY</span>
-                            </div>
-
-                            <div class="item-row">
-                                <div class="product-input">
-                                    <label for="product-name" class="visually-hidden">Product name</label>
-                                    <input type="text" class="form-control" placeholder="Enter Product">
-                                </div>
-                                <div>
-                                    <label for="quantity" class="visually-hidden">Quantity</label>
-                                    <input type="text" class="form-control quantity-input" id="quantity" name="quantity" required>
-                                </div>
-                                <div>
-                            </div>
-                        </section>
-
-                        <section class="form-card notes-card">
-                            <div class="card-heading">
-                                <span class="step-number">03</span>
-                                <div>
-                                    <h2>Add Image</h2>
-                                    <p>Include image if neccessary</p>
+                                
+                                <form class="invoice-form" action="#" method="get">
+                                    <section class="form-card" aria-labelledby="customer-heading">
+                                        <div class="card-heading">
+                                            <span class="step-number">01</span>
+                                            <div>
+                                        <h3 id="customer-heading">Customer information</h3>
+                                        <p>Who is this job order for?</p>
+                                        </div>
+                                        </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="customer-name" class="form-label">Customer name</label>
+                                        <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="Enter customer name"
+                                            autocomplete="name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <label for="customer-number" class="form-label">Contact number</label>
+                                        <input type="tel" class="form-control" id="customer-number" name="customer_number" placeholder="09XX XXX XXXX"
+                                            autocomplete="tel" required>
+                                        </div>
+                                    <div class="col-md-7">
+                                        <label for="shipping-address" class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="shipping-address" name="shipping_address"
+                                            placeholder="House number, street, barangay" autocomplete="street-address" required>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="landmarks" class="form-label">Nearby landmark <span class="optional">(optional)</span></label>
+                                        <input type="text" class="form-control" id="landmarks" name="landmarks" placeholder="e.g. Near the town plaza">
                                     </div>
                                     </div>
-                                    <form action="">
-                                        <button class="btn btn-success"> Image</button>
-                                    </form>
-                                </div>
-                                </div>
-                        </section>
+                                    </section>
 
-            </form>
+                            <section class="form-card" aria-labelledby="job-heading">
+                                <div class="card-heading">
+                                    <span class="step-number">02</span>
+                                    <div>
+                                        <h3 id="job-heading">Job order details</h3>
+                                        <p>Add the requested item and quantity.</p>
+                                        </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label for="product-name" class="form-label">Product or service</label>
+                                        <input type="text" class="form-control" id="product-name" name="product" placeholder="What are we making?"
+                                            required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="quantity" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" placeholder="Enter quantity"
+                                            required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="unit-price" class="form-label">Price per item (₱)</label>
+                                        <input type="number" class="form-control" id="unit-price" name="unit_price" min="0" step="0.01" placeholder="0.00"
+                                            required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="due-date" class="form-label">Target completion date</label>
+                                        <input type="date" class="form-control" id="due-date" name="due_date">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="job-notes" class="form-label">Job order notes <span class="optional">(optional)</span></label>
+                                        <textarea class="form-control" id="job-notes" name="notes" rows="3"
+                                            placeholder="Add sizes, colors, special instructions, or other details..."></textarea>
+                                    </div>
+                                    </div>
+                                    </section>
+
+                            <section class="form-card" aria-labelledby="image-heading">
+                                <div class="card-heading">
+                                    <span class="step-number">03</span>
+                                    <div>
+                                        <h3 id="image-heading">Reference image</h3>
+                                        <p>Attach an image if the job needs one.</p>
+                                    </div>
+                                </div>
+                                <label for="reference-image" class="upload-area">
+                                    <span class="upload-icon">↑</span>
+                                    <span><strong>Choose an image to upload</strong><small>PNG, JPG, or JPEG</small></span>
+                                    <input type="file" id="reference-image" name="reference_image" accept="image/png,image/jpeg">
+                                </label>
+                                </section>
+                                
+                                <div class="form-actions">
+                                    <button class="btn clear-button" type="reset">Clear form</button>
+                                    <button class="btn submit-button" type="submit">Create invoice <span aria-hidden="true">→</span></button>
+                                </div>
+                                </form>
+                    </section>
+                    
+                    <section class="view-panel logs-panel" id="invoice-logs" role="tabpanel" aria-labelledby="view-logs">
+                        <div class="logs-intro">
+                            <div>
+                                <p class="panel-kicker">INVOICE RECORDS</p>
+                                <h2>Invoice logs</h2>
+                                <p>Recent job order invoices created by the admin.</p>
+                            </div>
+                            <span class="record-count">4 records</span>
+                        </div>
+                    
+                        <div class="log-filters">
+                            <label for="log-search" class="visually-hidden">Search invoices</label>
+                            <input class="form-control search-input" id="log-search" type="search"
+                                placeholder="Search customer or invoice number">
+                            <label for="status-filter" class="visually-hidden">Filter by status</label>
+                            <select class="form-select status-filter" id="status-filter">
+                                <option>All statuses</option>
+                                <option>Pending</option>
+                                <option>In progress</option>
+                                <option>Completed</option>
+                            </select>
+                        </div>
+<div class="table-responsive">
+    <table class="table invoice-table align-middle mb-0">
+        <thead>
+            <tr>
+                <th scope="col">INVOICE NO.</th>
+                <th scope="col">CUSTOMER</th>
+                <th scope="col">JOB ORDER</th>
+                <th scope="col">DATE CREATED</th>
+                <th scope="col">TOTAL</th>
+                <th scope="col">STATUS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>#INV-2026-104</strong></td>
+                <td>Maria Santos</td>
+                <td>Custom polo shirts · 24 pcs</td>
+                <td>Nov 06, 2026</td>
+                <td><strong>₱4,800.00</strong></td>
+                <td><span class="status-badge status-progress">In progress</span></td>
+            </tr>
+            <tr>
+                <td><strong>#INV-2026-103</strong></td>
+                <td>Andres Reyes</td>
+                <td>Team uniforms · 12 pcs</td>
+                <td>Nov 05, 2026</td>
+                <td><strong>₱3,600.00</strong></td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+            </tr>
+            <tr>
+                <td><strong>#INV-2026-102</strong></td>
+                <td>Lea Cruz</td>
+                <td>Printed tote bags · 30 pcs</td>
+                <td>Nov 04, 2026</td>
+                <td><strong>₱2,250.00</strong></td>
+                <td><span class="status-badge status-complete">Completed</span></td>
+            </tr>
+            <tr>
+                <td><strong>#INV-2026-101</strong></td>
+                <td>Paolo Garcia</td>
+                <td>Event shirts · 18 pcs</td>
+                <td>Nov 03, 2026</td>
+                <td><strong>₱3,240.00</strong></td>
+                <td><span class="status-badge status-complete">Completed</span></td>
+            </tr>
+        </tbody>
+    </table>
+                        </div>
+                        <p class="sample-note">Sample invoice log entries for the interface preview.</p>
+                    </section>
+                </div>
+                </div>
         </main>
     </div>
 </body>
