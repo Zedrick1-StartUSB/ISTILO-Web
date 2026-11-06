@@ -145,7 +145,7 @@ a {
 .invoice-summary {
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: var(--paper);
+    background: grey
 }
 
 .form-card {
@@ -186,7 +186,7 @@ a {
 
 .form-label {
     margin-bottom: 7px;
-    color: #514a43;
+    color: black;
     font-size: 10px;
     font-weight: 600;
 }
@@ -200,8 +200,9 @@ a {
 
 .form-control,
 .form-select {
+    background-color: white;
     min-height: 41px;
-    border-color: #e8e2da;
+    border-color: black;
     border-radius: 7px;
     color: #514a43;
     font-size: 11px;

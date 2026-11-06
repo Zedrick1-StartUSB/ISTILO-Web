@@ -28,12 +28,12 @@
             <form action="" method="get">
                 <div>
                     <div class="form-column">
-                        <section class="form-card" aria-labelledby="customer-heading">
+                        <section class="form-card">
                             <div class="card-heading">
                                 <span class="step-number">01</span>
                                 <div>
                                     <h2 id="customer-heading">Customer details</h2>
-                                    <p>Customer Information Regarding this order</p>
+                                    <p class="color-black">Customer Information Regarding this order</p>
                                 </div>
                             </div>
 
@@ -50,10 +50,14 @@
                                     <label for="shipping-address" class="form-label">Shipping address</label>
                                     <input type="text" class="form-control" id="shipping-address" name="shipping_address" placeholder="Street, city, and postcode" autocomplete="street-address">
                                 </div>
+                                <div class="col-12">
+                                    <label for="land-marks" class="form-label">Remarkable Land marks</label>
+                                    <input type="text" class="form-control" placeholder="Near something">
+                                </div>
                             </div>
                         </section>
 
-                        <section class="form-card item-card" aria-labelledby="items-heading">
+                        <section class="form-card item-card">
                             <div class="card-heading item-heading">
                                 <span class="step-number">02</span>
                                 <div>
@@ -64,58 +68,38 @@
                             </div>
 
                             <div class="items-labels" aria-hidden="true">
-                                <span>PRODUCT</span><span>QTY</span><span>PRICE</span><span>SUBTOTAL</span>
+                                <span class="form-label">PRODUCT</span>
+                                <span class="form-label">QTY</span>
                             </div>
 
                             <div class="item-row">
                                 <div class="product-input">
                                     <label for="product-name" class="visually-hidden">Product name</label>
-                                    <select class="form-select" id="product-name" name="product" required>
-                                        <option value="" selected disabled>Choose a product</option>
-                                        <option>Everyday Tee</option>
-                                        <option>Weekend Tote</option>
-                                        <option>Cozy Knit Cardigan</option>
-                                    </select>
+                                    <input type="text" class="form-control" placeholder="Enter Product">
                                 </div>
                                 <div>
                                     <label for="quantity" class="visually-hidden">Quantity</label>
-                                    <input type="number" class="form-control quantity-input" id="quantity" name="quantity" min="1" value="1" required>
+                                    <input type="text" class="form-control quantity-input" id="quantity" name="quantity" required>
                                 </div>
                                 <div>
-                                    <label for="price" class="visually-hidden">Unit price</label>
-                                    <div class="price-input"><span>$</span><input type="number" class="form-control" id="price" name="price" min="0" step="0.01" placeholder="0.00" required></div>
-                                </div>
-                                <strong class="item-subtotal">$0.00</strong>
                             </div>
-
-                            <button type="button" class="add-item-button"><span aria-hidden="true">＋</span> Add another item</button>
                         </section>
 
-                        <section class="form-card notes-card" aria-labelledby="notes-heading">
+                        <section class="form-card notes-card">
                             <div class="card-heading">
                                 <span class="step-number">03</span>
                                 <div>
-                                    <h2 id="notes-heading">A little note</h2>
-                                    <p>Anything special to remember for this order?</p>
+                                    <h2>Add Image</h2>
+                                    <p>Include image if neccessary</p>
+                                    </div>
+                                    </div>
+                                    <form action="">
+                                        <button class="btn btn-success"> Image</button>
+                                    </form>
                                 </div>
-                            </div>
-                            <label for="order-notes" class="visually-hidden">Order notes</label>
-                            <textarea class="form-control notes-input" id="order-notes" name="notes" rows="3" placeholder="Gift wrapping, delivery notes, or a thank-you message..."></textarea>
+                                </div>
                         </section>
-                    </div>
-                </div> <br>
-                <section class="form-card notes-card">
-                    <div class="card-heading">
-                        <span class="step-number">04</span>
-                        <div>
-                            <h2>Add Image</h2>
-                            <p>Include image if neccessary</p>
-                        </div>
-                    </div>
-                    <form action="">
-                        <button class="btn btn-success"> Image</button>
-                    </form>
-                </section>
+
             </form>
         </main>
     </div>
