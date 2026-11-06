@@ -1,0 +1,468 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
+
+:root {
+    --ink: #292521;
+    --muted: #817970;
+    --pink: #eaa5a0;
+    --pink-dark: #bd6966;
+    --cream: #f6eee5;
+    --paper: #fffdfa;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    color: var(--ink);
+    background: var(--cream);
+    font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.login-page {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    padding: 48px 0;
+}
+
+.login-card {
+    overflow: hidden;
+    max-width: 1040px;
+    min-height: 650px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid rgba(65, 47, 36, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 18px 55px rgba(89, 63, 47, 0.1);
+}
+
+.welcome-panel {
+    position: relative;
+    display: flex;
+    min-height: 650px;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 38px 44px 25px;
+    background: #f1d8ce;
+}
+
+.brand {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 19px;
+}
+
+.welcome-copy {
+    position: relative;
+    z-index: 1;
+    margin-top: 45px;
+}
+
+.eyebrow,
+.form-kicker {
+    margin: 0 0 13px;
+    color: #825b51;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.7px;
+}
+
+.welcome-copy h1 {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(42px, 5vw, 57px);
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+}
+
+.welcome-copy h1 span {
+    color: var(--pink-dark);
+    font-style: italic;
+}
+
+.welcome-description {
+    max-width: 290px;
+    margin: 17px 0 0;
+    color: #66574f;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.outfit-art {
+    position: relative;
+    display: flex;
+    min-height: 250px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    margin: 10px -8px 0;
+}
+
+.sun {
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    border: 1px dashed rgba(131, 88, 75, 0.3);
+    border-radius: 50%;
+}
+
+.sun::before {
+    position: absolute;
+    inset: 14px;
+    content: "";
+    border-radius: 50%;
+    background: #e9b9a7;
+}
+
+.product-card {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    width: 142px;
+    height: 172px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(55, 39, 32, 0.1);
+    border-radius: 8px;
+    background: #fffaf4;
+    box-shadow: 0 9px 22px rgba(92, 59, 45, 0.12);
+}
+
+.product-card-back {
+    transform: translate(-66px, -7px) rotate(-11deg);
+    background: #e8eee1;
+}
+
+.product-card-front {
+    transform: translate(53px, 15px) rotate(8deg);
+}
+
+.product-emoji {
+    font-size: 65px;
+    line-height: 1;
+}
+
+.product-name {
+    margin-top: 16px;
+    color: #6d625a;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.sparkle {
+    position: absolute;
+    z-index: 2;
+    color: #9c6558;
+}
+
+.sparkle-one {
+    top: 34px;
+    left: 17%;
+    font-size: 25px;
+}
+
+.sparkle-two {
+    right: 15%;
+    bottom: 42px;
+    font-size: 28px;
+}
+
+.art-note {
+    position: absolute;
+    right: 6%;
+    bottom: 11px;
+    color: #825b51;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 15px;
+    font-style: italic;
+    transform: rotate(-7deg);
+}
+
+.welcome-footer {
+    margin: 18px 0 0;
+    color: #705e55;
+    font-size: 11px;
+}
+
+.welcome-footer span {
+    color: var(--pink-dark);
+}
+
+.form-panel {
+    position: relative;
+    display: flex;
+    min-height: 650px;
+    flex-direction: column;
+    justify-content: center;
+    padding: 54px clamp(36px, 6vw, 76px);
+}
+
+.form-content {
+    width: 100%;
+    max-width: 360px;
+    margin: auto;
+}
+
+.form-kicker {
+    margin-bottom: 10px;
+    color: var(--pink-dark);
+}
+
+.form-content h2 {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 42px;
+    letter-spacing: -1px;
+}
+
+.form-intro {
+    margin: 7px 0 31px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.form-label {
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.form-control {
+    min-height: 47px;
+    padding: 12px 14px;
+    border-color: #e6dfd8;
+    border-radius: 7px;
+    background: #fff;
+    font-size: 13px;
+}
+
+.form-control::placeholder {
+    color: #b1aaa3;
+}
+
+.form-control:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(234, 165, 160, 0.2);
+}
+
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 13px 0 24px;
+    font-size: 11px;
+}
+
+.remember-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #6f6861;
+}
+
+.remember-option .form-check-input {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    border-color: #c9bdb3;
+}
+
+.remember-option .form-check-input:checked {
+    border-color: var(--pink-dark);
+    background-color: var(--pink-dark);
+}
+
+.text-link {
+    color: var(--pink-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.text-link:hover {
+    color: #96524f;
+    text-decoration: underline;
+}
+
+.login-button {
+    min-height: 47px;
+    border: 0;
+    border-radius: 7px;
+    background: var(--pink-dark);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.login-button span {
+    margin-left: 5px;
+    font-size: 17px;
+}
+
+.login-button:hover {
+    background: #a95855;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.signup-prompt,
+.guest-note {
+    color: #827a73;
+    font-size: 15px;
+    text-align: center;
+}
+
+.signup-prompt {
+    margin: 22px 0 0;
+}
+
+.signup-link {
+    margin-left: 3px;
+}
+
+.form-divider {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin: 22px 0;
+    color: #a69c93;
+    font-size: 10px;
+}
+
+.form-divider::before,
+.form-divider::after {
+    height: 1px;
+    flex: 1;
+    content: "";
+    background: #eee8e2;
+}
+
+.guest-note {
+    margin: 0;
+}
+
+.guest-note .text-link {
+    margin-left: 3px;
+}
+
+.copyright {
+    position: absolute;
+    right: 20px;
+    bottom: 17px;
+    left: 20px;
+    margin: 0;
+    color: #a59c94;
+    font-size: 9px;
+    text-align: center;
+}
+
+@media (max-width: 991.98px) {
+    .login-page {
+        padding: 24px 0;
+    }
+
+    .login-card {
+        max-width: 560px;
+    }
+
+    .welcome-panel {
+        min-height: 570px;
+    }
+
+    .outfit-art {
+        min-height: 220px;
+    }
+
+    .form-panel {
+        min-height: 570px;
+        padding: 54px 40px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .login-page {
+        padding: 0;
+    }
+
+    .login-page > .container {
+        padding: 0;
+    }
+
+    .login-card {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .welcome-panel {
+        min-height: 490px;
+        padding: 27px 26px 20px;
+    }
+
+    .welcome-copy {
+        margin-top: 34px;
+    }
+
+    .welcome-copy h1 {
+        font-size: 45px;
+    }
+
+    .outfit-art {
+        min-height: 200px;
+    }
+
+    .sun {
+        width: 165px;
+        height: 165px;
+    }
+
+    .product-card {
+        width: 126px;
+        height: 152px;
+    }
+
+    .product-emoji {
+        font-size: 55px;
+    }
+
+    .form-panel {
+        min-height: 550px;
+        padding: 48px 27px 65px;
+    }
+
+    .copyright {
+        bottom: 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

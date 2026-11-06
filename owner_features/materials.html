@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f5ef">
+    <title>Materials | little label</title>
+    <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="materials.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <a class="brand" href="dashboard.html"><span class="brand-mark">l.</span><span>little label</span></a>
+            <p class="nav-caption">MENU</p>
+            <nav class="side-nav" aria-label="Main navigation">
+                <a class="side-link" href="dashboard.html">Dashboard</a>
+                <a class="side-link" href="orders.html">Orders</a>
+                <a class="side-link active" href="materials.html" aria-current="page">Materials</a>
+                <a class="side-link" href="users.htmlUsers">Users</a>
+                <a class="side-link" href="history_logs.html">History Logs</a>
+            </nav>
+            <a class="profile-link" href="users.html">
+                <span class="avatar">JL</span>
+                <span class="profile-copy"><strong>Jamie Lee</strong><small>Shop owner</small></span>
+                <span class="profile-dots">···</span>
+            </a>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header">
+                <div>
+                    <p class="today-label">SHOP MANAGEMENT</p>
+                    <h1>Materials</h1>
+                    <p class="page-subtitle">A quick check-in on the things that make your products.</p>
+                </div>
+                <a class="add-product-button" href="#materials-table"><span aria-hidden="true">＋</span> Add material</a>
+            </header>
+
+            <section class="page-stats" aria-label="Materials summary">
+                <article class="page-stat"><span>Material types</span><strong>18</strong><small>In your inventory</small></article>
+                <article class="page-stat"><span>Running low</span><strong>3</strong><small>Worth a restock</small></article>
+                <article class="page-stat"><span>In stock</span><strong>15</strong><small>Looking good</small></article>
+                <article class="page-stat"><span>Last restock</span><strong class="date-value">May 14</strong><small>Four days ago</small></article>
+            </section>
+
+            <section class="panel page-panel" id="materials-table">
+                <div class="panel-heading page-panel-heading">
+                    <div><h2>Materials inventory</h2><p>Keep an eye on supplies for your next collection</p></div>
+                    <span class="subtle-badge">18 materials</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table data-table align-middle mb-0">
+                        <thead><tr><th>MATERIAL</th><th>TYPE</th><th>QUANTITY</th><th>LAST RESTOCKED</th><th>STATUS</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="material-name"><span class="swatch swatch-cream"></span> Cotton jersey</span></td><td>Fabric</td><td>42 yards</td><td>May 14, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
+                            <tr><td><span class="material-name"><span class="swatch swatch-blue"></span> Denim twill</span></td><td>Fabric</td><td>8 yards</td><td>May 10, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
+                            <tr><td><span class="material-name"><span class="swatch swatch-pink"></span> Recycled thread</span></td><td>Thread</td><td>24 spools</td><td>May 12, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
+                            <tr><td><span class="material-name"><span class="swatch swatch-green"></span> Linen blend</span></td><td>Fabric</td><td>6 yards</td><td>May 08, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
+                            <tr><td><span class="material-name"><span class="swatch swatch-yellow"></span> Wooden buttons</span></td><td>Fastener</td><td>160 pieces</td><td>May 11, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
+                            <tr><td><span class="material-name"><span class="swatch swatch-lilac"></span> Kraft mailers</span></td><td>Packaging</td><td>12 pieces</td><td>May 02, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <footer class="dashboard-footer">Made with care at little label <span aria-hidden="true">♡</span></footer>
+        </main>
+    </div>
+</body>
+</html>

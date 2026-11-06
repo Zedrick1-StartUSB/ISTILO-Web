@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f6f2">
+    <title>Quality Check Desk</title>
+    <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
+    <link rel="stylesheet" href="quality_inspection.css">
+</head>
+<body>
+    <div class="quality-app">
+        <aside class="quality-sidebar">
+            <a class="quality-brand" href="#dashboard"><span class="brand-stamp">q.</span><span>good form<small>QUALITY CHECK DESK</small></span></a>
+            <p class="sidebar-label">MY DESK</p>
+            <nav class="quality-nav" aria-label="Quality inspection workspace">
+                <a class="quality-nav-link current" href="#dashboard" aria-current="page"><span>⌂</span> Dashboard</a>
+                <a class="quality-nav-link" href="#incoming"><span>◉</span> Incoming work <b>3</b></a>
+                <a class="quality-nav-link" href="#finished"><span>✓</span> Finished work</a>
+            </nav>
+            <div class="quality-reminder">
+                <span aria-hidden="true">✦</span>
+                <p><strong>Little details matter.</strong><br>A careful check makes a happy customer.</p>
+            </div>
+            <div class="inspector-profile">
+                <span class="inspector-avatar">TC</span>
+                <span><strong>Taylor Chen</strong><small>Quality inspector</small></span>
+            </div>
+        </aside>
+
+        <main class="quality-main">
+            <section class="screen-section" id="dashboard" aria-labelledby="dashboard-title">
+                <header class="quality-header"><div><p class="date-label">WEDNESDAY, JUNE 03, 2026</p><h1 id="dashboard-title">Inspection dashboard <span aria-hidden="true">✦</span></h1><p class="header-copy">A quick overview of work waiting for your careful check.</p></div><span class="inspection-status"><span></span> Ready to inspect</span></header>
+                <section class="quality-stats" aria-label="Inspection overview">
+                    <article class="quality-stat stat-cream"><span>Incoming work</span><strong>3</strong><small>Ready for inspection</small></article>
+                    <article class="quality-stat stat-blue"><span>Being inspected</span><strong>1</strong><small>On your table</small></article>
+                    <article class="quality-stat stat-green"><span>Finished today</span><strong>6</strong><small>Checks completed</small></article>
+                </section>
+                <section class="panel dashboard-panel">
+                    <div class="panel-heading"><div><p class="section-kicker">YOUR DESK</p><h2>Today's overview</h2><p>Review incoming items and recent inspection results.</p></div></div>
+                    <div class="dashboard-task-row"><span class="mini-task-icon">◉</span><span><strong>Next up: Everyday Tee</strong><small>#TF-2084 · 24 pieces · Sent by Production</small></span><a class="dashboard-link" href="#incoming">Open incoming work →</a></div>
+                    <div class="dashboard-task-row"><span class="mini-task-icon icon-sage">✓</span><span><strong>Recently checked: Weekend Tote</strong><small>#TF-2078 · Inspection passed</small></span><a class="dashboard-link" href="#finished">See finished work →</a></div>
+                    <div class="dashboard-note"><span>✦</span><p><strong>Quality reminder</strong><br>Record a clear note whenever an item needs another look.</p></div>
+                </section>
+            </section>
+
+            <section class="screen-section" id="incoming" aria-label="Incoming quality inspection work">
+            <header class="quality-header">
+                <div>
+                    <p class="date-label">WEDNESDAY, JUNE 03, 2026</p>
+                    <h1>Quality check desk <span aria-hidden="true">✦</span></h1>
+                    <p class="header-copy">Production has sent these finished pieces for a careful look.</p>
+                </div>
+                <span class="inspection-status"><span></span> Ready to inspect</span>
+            </header>
+
+            <section class="quality-stats" aria-label="Inspection overview">
+                <article class="quality-stat stat-cream"><span>Waiting for a check</span><strong>3</strong><small>From Production</small></article>
+                <article class="quality-stat stat-blue"><span>Being inspected</span><strong>1</strong><small>On your table</small></article>
+                <article class="quality-stat stat-green"><span>Checked today</span><strong>6</strong><small>Nice work so far</small></article>
+            </section>
+
+            <div class="quality-layout">
+                <section class="inspection-queue panel" id="inspection-queue" aria-labelledby="queue-title">
+                    <div class="panel-heading">
+                        <div><p class="section-kicker">FROM PRODUCTION</p><h2 id="queue-title">Inspection queue</h2><p>Completed work ready for a quality check.</p></div>
+                        <span class="queue-count">3 jobs</span>
+                    </div>
+
+                    <a class="inspection-row selected" href="#inspection-details">
+                        <span class="product-color tee-color">TEE</span>
+                        <span class="inspection-copy"><strong>Everyday Tee</strong><small>#TF-2084 · 24 pieces</small><span><i class="status-pill status-waiting">Needs check</i> Sent 10:32 AM</span></span>
+                        <span class="row-arrow">›</span>
+                    </a>
+                    <a class="inspection-row" href="#inspection-details">
+                        <span class="product-color tote-color">TOTE</span>
+                        <span class="inspection-copy"><strong>Weekend Tote</strong><small>#TF-2081 · 12 pieces</small><span><i class="status-pill status-review">In review</i> Sent 9:15 AM</span></span>
+                        <span class="row-arrow">›</span>
+                    </a>
+                    <a class="inspection-row" href="#inspection-details">
+                        <span class="product-color knit-color">KNIT</span>
+                        <span class="inspection-copy"><strong>Cozy Knit Cardigan</strong><small>#TF-2079 · 8 pieces</small><span><i class="status-pill status-waiting">Needs check</i> Sent yesterday</span></span>
+                        <span class="row-arrow">›</span>
+                    </a>
+                </section>
+
+                <section class="inspection-detail panel" id="inspection-details" aria-labelledby="detail-title">
+                    <div class="detail-heading">
+                        <div><p class="section-kicker">SELECTED JOB · #TF-2084</p><h2 id="detail-title">Everyday Tee</h2></div>
+                        <span class="status-pill status-waiting">Needs check</span>
+                    </div>
+
+                    <div class="item-preview" role="img" aria-label="Preview of the Everyday Tee submitted for quality inspection">
+                        <div class="preview-circle"></div>
+                        <div class="preview-shirt"><span>little<br>things</span></div>
+                        <span class="preview-caption">Finished sample · front view</span>
+                    </div>
+
+                    <div class="production-info">
+                        <div><span>Sent by</span><strong>Morgan Reed <small>· Production</small></strong></div>
+                        <div><span>Quantity</span><strong>24 pieces</strong></div>
+                        <div><span>Colors</span><strong>Natural, dusty rose</strong></div>
+                        <div><span>Submitted</span><strong>June 03 · 10:32 AM</strong></div>
+                    </div>
+
+                    <div class="production-note">
+                        <span aria-hidden="true">“</span>
+                        <div><strong>Production update</strong><p>All 24 pieces are finished. Print placement and seams have been checked on the sample.</p></div>
+                    </div>
+
+                    <form class="inspection-form" action="#" method="get">
+                        <p class="checklist-heading">INSPECTION CHECKLIST</p>
+                        <label><input type="checkbox" name="check_stitching"> Stitching and seams look neat</label>
+                        <label><input type="checkbox" name="check_print"> Print placement matches approved layout</label>
+                        <label><input type="checkbox" name="check_quantity"> Quantity and color options are correct</label>
+
+                        <label for="inspection-result" class="form-label result-label">Inspection result</label>
+                        <select class="form-select" id="inspection-result" name="inspection_result" required>
+                            <option value="" selected disabled>Choose a result</option>
+                            <option value="passed">Passed - ready to move on</option>
+                            <option value="changes">Needs changes - send back</option>
+                        </select>
+                        <label for="inspection-note" class="form-label note-label">Message for Production <span>(optional)</span></label>
+                        <textarea class="form-control" id="inspection-note" name="message" rows="2" placeholder="Share your check results or list a change to make..."></textarea>
+                        <button class="btn send-back-button w-100" type="submit">Send update to Production <span aria-hidden="true">↗</span></button>
+                        <p class="form-hint">Use this to approve the pieces or send feedback back to the Production team.</p>
+                    </form>
+
+                    <form class="reply-form" id="team-message" action="#" method="get">
+                        <div class="reply-heading"><span aria-hidden="true">↔</span><div><strong>Message from Production</strong><p>Keep the conversation going both ways.</p></div></div>
+                        <label for="reply-message" class="form-label">Reply to Morgan</label>
+                        <textarea class="form-control" id="reply-message" name="reply" rows="2" placeholder="Ask a question or send an update..."></textarea>
+                        <button class="btn reply-button" type="submit">Send reply <span aria-hidden="true">→</span></button>
+                    </form>
+                </section>
+            </div>
+            </section>
+
+            <section class="screen-section" id="finished" aria-labelledby="finished-title">
+                <header class="quality-header"><div><p class="date-label">QUALITY CHECK DESK · RECENT COMPLETIONS</p><h1 id="finished-title">Finished work</h1><p class="header-copy">Inspection decisions and completed checks.</p></div><span class="inspection-status"><span></span> 6 checked today</span></header>
+                <section class="panel finished-panel">
+                    <div class="panel-heading"><div><p class="section-kicker">COMPLETED INSPECTIONS</p><h2>Check history</h2><p>Recent items reviewed by Quality Inspection.</p></div><span class="queue-count">6 total</span></div>
+                    <div class="finished-item"><span class="product-color tote-color">TOTE</span><span class="finished-copy"><strong>Weekend Tote</strong><small>#TF-2078 · 12 pieces inspected</small><span>Completed Jun 03 · Passed inspection</span></span><span class="finished-badge">Passed</span></div>
+                    <div class="finished-item"><span class="product-color tee-color">TEE</span><span class="finished-copy"><strong>Everyday Tee</strong><small>#TF-2075 · 18 pieces inspected</small><span>Completed Jun 02 · Sent with a note</span></span><span class="finished-badge">Passed</span></div>
+                    <div class="finished-item"><span class="product-color knit-color">KNIT</span><span class="finished-copy"><strong>Cozy Knit Cardigan</strong><small>#TF-2071 · 8 pieces inspected</small><span>Completed Jun 01 · Returned for a small fix</span></span><span class="finished-badge needs-fix">Needs changes</span></div>
+                    <div class="finished-footer"><span aria-hidden="true">✦</span> Every check helps the team make something better.</div>
+                </section>
+            </section>
+
+            <footer class="quality-footer">A little care goes a long way <span aria-hidden="true">♡</span></footer>
+        </main>
+    </div>
+</body>
+</html>

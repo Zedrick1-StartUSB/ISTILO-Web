@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f5ef">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
+    <link rel="stylesheet" href="admin_panel.css">
+</head>
+<body>
+    <div class="invoice-app">
+        <header class="admin-topbar">
+            <a class="brand" href="admin_panel.html">
+                <span>Istilo@Nasugbu Enterprises</span>
+            </a>
+            <span class="workspace-label">ADMIN WORKSPACE</span>
+        </header>
+
+        <main class="invoice-main">
+            <header class="page-top">
+                <div>
+                    <h1>Create an invoice for Job Order</h1>
+                    <p class="page-description">Add customer and product details to prepare a new order.</p>
+                </div>
+            </header>
+            <!-- TODO: add realistic data information from the business  -->
+            <form action="" method="get">
+                <div>
+                    <div class="form-column">
+                        <section class="form-card" aria-labelledby="customer-heading">
+                            <div class="card-heading">
+                                <span class="step-number">01</span>
+                                <div>
+                                    <h2 id="customer-heading">Customer details</h2>
+                                    <p>Customer Information Regarding this order</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="customer-name" class="form-label">Customer name</label>
+                                    <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="e.g. Ava Mitchell" autocomplete="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customer-email" class="form-label">Contact Number</label>
+                                    <input type="text" class="form-control" id="customer-number" name="customer_number" placeholder="09123456689" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="shipping-address" class="form-label">Shipping address</label>
+                                    <input type="text" class="form-control" id="shipping-address" name="shipping_address" placeholder="Street, city, and postcode" autocomplete="street-address">
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="form-card item-card" aria-labelledby="items-heading">
+                            <div class="card-heading item-heading">
+                                <span class="step-number">02</span>
+                                <div>
+                                    <h2 id="items-heading">Order items</h2>
+                                    <p>Add the products going into this order.</p>
+                                </div>
+                                <span class="item-count">1 item</span>
+                            </div>
+
+                            <div class="items-labels" aria-hidden="true">
+                                <span>PRODUCT</span><span>QTY</span><span>PRICE</span><span>SUBTOTAL</span>
+                            </div>
+
+                            <div class="item-row">
+                                <div class="product-input">
+                                    <label for="product-name" class="visually-hidden">Product name</label>
+                                    <select class="form-select" id="product-name" name="product" required>
+                                        <option value="" selected disabled>Choose a product</option>
+                                        <option>Everyday Tee</option>
+                                        <option>Weekend Tote</option>
+                                        <option>Cozy Knit Cardigan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="quantity" class="visually-hidden">Quantity</label>
+                                    <input type="number" class="form-control quantity-input" id="quantity" name="quantity" min="1" value="1" required>
+                                </div>
+                                <div>
+                                    <label for="price" class="visually-hidden">Unit price</label>
+                                    <div class="price-input"><span>$</span><input type="number" class="form-control" id="price" name="price" min="0" step="0.01" placeholder="0.00" required></div>
+                                </div>
+                                <strong class="item-subtotal">$0.00</strong>
+                            </div>
+
+                            <button type="button" class="add-item-button"><span aria-hidden="true">＋</span> Add another item</button>
+                        </section>
+
+                        <section class="form-card notes-card" aria-labelledby="notes-heading">
+                            <div class="card-heading">
+                                <span class="step-number">03</span>
+                                <div>
+                                    <h2 id="notes-heading">A little note</h2>
+                                    <p>Anything special to remember for this order?</p>
+                                </div>
+                            </div>
+                            <label for="order-notes" class="visually-hidden">Order notes</label>
+                            <textarea class="form-control notes-input" id="order-notes" name="notes" rows="3" placeholder="Gift wrapping, delivery notes, or a thank-you message..."></textarea>
+                        </section>
+                    </div>
+                </div> <br>
+                <section class="form-card notes-card">
+                    <div class="card-heading">
+                        <span class="step-number">04</span>
+                        <div>
+                            <h2>Add Image</h2>
+                            <p>Include image if neccessary</p>
+                        </div>
+                    </div>
+                    <form action="">
+                        <button class="btn btn-success"> Image</button>
+                    </form>
+                </section>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f6eee5">
+    <title>Sign up | little label</title>
+    <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+    <main class="login-page signup-page">
+        <div class="container">
+            <div class="row login-card signup-card g-0">
+                <section class="col-lg-6 welcome-panel signup-welcome" aria-labelledby="welcome-title">
+                    <a class="brand" href="login.html" aria-label="little label home">
+                        <span class="brand-mark">l.</span>
+                        <span>little label</span>
+                    </a>
+
+                    <div class="welcome-copy">
+                        <p class="eyebrow">YOUR STYLE, YOUR WAY</p>
+                        <h1 id="welcome-title">Find your<br><span>good fit.</span></h1>
+                        <p class="welcome-description">Join our little corner for new finds, comfy favourites, and outfits that feel like you.</p>
+                    </div>
+
+                    <div class="outfit-art signup-art" aria-hidden="true">
+                        <div class="sun"></div>
+                        <span class="sparkle sparkle-one">✳</span>
+                        <span class="sparkle sparkle-two">✦</span>
+                        <div class="product-card product-card-back">
+                            <span class="product-emoji">🧥</span>
+                            <span class="product-name">the cozy layer</span>
+                        </div>
+                        <div class="product-card product-card-front">
+                            <span class="product-emoji">👟</span>
+                            <span class="product-name">everyday kicks</span>
+                        </div>
+                        <span class="art-note">your closet called!</span>
+                    </div>
+
+                    <p class="welcome-footer">Good style starts with feeling good <span>♡</span></p>
+                </section>
+
+                <section class="col-lg-6 form-panel signup-form" aria-labelledby="signup-title">
+                    <div class="form-content">
+                        <a href="login.html">Return</a>
+                        <p class="form-kicker">COME ON IN</p>
+                        <h2 id="signup-title">Create account</h2>
+                        <p class="form-intro">It only takes a minute to get started.</p>
+
+                        <form action="#" method="post">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label for="first-name" class="form-label">First name</label>
+                                    <input type="text" class="form-control" id="first-name" name="first_name" placeholder="Jamie" autocomplete="given-name" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="last-name" class="form-label">Last name</label>
+                                    <input type="text" class="form-control" id="last-name" name="last_name" placeholder="Lee" autocomplete="family-name" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Username</label>
+                                    <input type="email" class="form-control" id="username" name="username" placeholder="username" autocomplete="email" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Kindly enter your password" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="confirm-password" class="form-label">Confirm password</label>
+                                    <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Type your password again" autocomplete="new-password" minlength="8" required>
+                                </div>
+                            </div><br>
+                            <button class="btn login-button w-100 signup-button" type="submit">Create my account <span aria-hidden="true">→</span></button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
