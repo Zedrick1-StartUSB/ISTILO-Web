@@ -5,6 +5,26 @@ require "dbconn.php";
 
 // Auth
 
+if($_SESSION["username"] && $_SESSION["role"]){ // Bawal bumalik if hindi naka logout
+
+    if($_SESSION["role"] == "admin"){
+        header("Location: /ISTILO_SYSTEM/admin/admin_panel.html");
+        exit();
+    }else if($_SESSION["role"] == "layout"){
+        header("Location: /ISTILO_SYSTEM/layout/layout_artist.html");
+        exit();
+    }else if($_SESSION["role"] == "production"){
+        header("Location: /ISTILO_SYSTEM/production/production.html");
+        exit();
+    }else if($_SESSION["role"] == "qa"){
+        header("Location: /ISTILO_SYSTEM/quality_inspect/quality_inspection.html");
+        exit();
+    }else if($_SESSION["role"] == "owner"){
+        header("Location: /ISTILO_SYSTEM/owner_features/dashboard.html");
+        exit();
+    }
+}
+
 // Login
 
 if(isset($_POST["login"])){
@@ -47,7 +67,6 @@ if(isset($_POST["login"])){
                     header("Location: /ISTILO_SYSTEM/owner_features/dashboard.html");
                     exit();
                 }
-                
             }
         }else{
             header("Location: login.html");
