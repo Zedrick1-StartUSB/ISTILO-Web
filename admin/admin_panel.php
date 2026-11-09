@@ -1,3 +1,13 @@
+<?php
+session_start();
+require "../logout.php";
+
+if($_SESSION["role"] != "admin"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +23,9 @@
         <header class="topbar">
             <a class="brand" href="#create-invoice">Istilo@Nasugbu Enterprises</a>
             <span class="workspace-label"><span></span> ADMIN WORKSPACE</span>
+            <form method="POST">
+                <button class="btn btn-danger" name="logout">Logout</button>
+            </form>
         </header>
 
         <main class="page-container">

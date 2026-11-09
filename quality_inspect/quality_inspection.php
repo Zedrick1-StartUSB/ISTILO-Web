@@ -1,3 +1,14 @@
+<?php
+session_start();
+require "../logout.php";
+
+if($_SESSION["role"] != "qa"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +28,9 @@
                 <a class="quality-nav-link current" href="#dashboard" aria-current="page"><span>⌂</span> Dashboard</a>
                 <a class="quality-nav-link" href="#incoming"><span>◉</span> Incoming work <b>3</b></a>
                 <a class="quality-nav-link" href="#finished"><span>✓</span> Finished work</a>
+                <form method="POST">
+                    <button class="btn btn-danger" name="logout">Logout</button>
+                </form>
             </nav>
             <div class="quality-reminder">
                 <span aria-hidden="true">✦</span>

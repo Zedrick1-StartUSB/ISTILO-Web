@@ -1,3 +1,14 @@
+<?php
+session_start();
+
+require "../logout.php";
+
+if($_SESSION["role"] != "layout"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +32,9 @@
                 <a class="studio-nav-link selected" href="#dashboard" aria-current="page"><span aria-hidden="true">⌂</span> Dashboard</a>
                 <a class="studio-nav-link" href="#incoming"><span aria-hidden="true">▤</span> Incoming work <span class="queue-count">4</span></a>
                 <a class="studio-nav-link" href="#finished"><span aria-hidden="true">✓</span> Finished work</a>
+                <form method="POST">
+                    <button class="btn btn-danger" name="logout">Logout</button>
+                </form>
             </nav>
 
             <div class="artist-profile">

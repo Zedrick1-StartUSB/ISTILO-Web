@@ -1,3 +1,13 @@
+<?php
+session_start();
+require "../logout.php";
+
+if($_SESSION["role"] != "owner"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +25,15 @@
             <a class="brand" href="dashboard.html"><span class="brand-mark">l.</span><span>little label</span></a>
             <p class="nav-caption">MENU</p>
             <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link" href="dashboard.html">Dashboard</a>
-                <a class="side-link active" href="orders.html" aria-current="page">Orders</a>
-                <a class="side-link" href="materials.html">Materials</a>
-                <a class="side-link" href="users.html">Users</a>
-                <a class="side-link" href="history_logs.html">History Logs</a>
+                <a class="side-link" href="dashboard.php">Dashboard</a>
+                <a class="side-link active" href="orders.php" aria-current="page">Orders</a>
+                <a class="side-link" href="materials.php">Materials</a>
+                <a class="side-link" href="users.php">Users</a>
+                <a class="side-link" href="history_logs.php">History Logs</a>
+                <form method="POST">
+                    <button class="btn btn-danger" name="logout">Logout</button>
+                </form>
             </nav>
-            <a class="profile-link" href="users.html">
-                <span class="avatar">JL</span>
-                <span class="profile-copy"><strong>Jamie Lee</strong><small>Shop owner</small></span>
-                <span class="profile-dots">···</span>
-            </a>
         </aside>
 
         <main class="main-content">

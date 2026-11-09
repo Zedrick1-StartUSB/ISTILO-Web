@@ -5,22 +5,22 @@ require "dbconn.php";
 
 // Auth
 
-if($_SESSION["username"] && $_SESSION["role"]){ // Bawal bumalik if hindi naka logout
+if(isset($_SESSION["username"]) && isset($_SESSION["role"])){ // Bawal bumalik if hindi naka logout
 
     if($_SESSION["role"] == "admin"){
-        header("Location: /ISTILO_SYSTEM/admin/admin_panel.html");
+        header("Location: /ISTILO_SYSTEM/admin/admin_panel.php");
         exit();
     }else if($_SESSION["role"] == "layout"){
-        header("Location: /ISTILO_SYSTEM/layout/layout_artist.html");
+        header("Location: /ISTILO_SYSTEM/layout/layout_artist.php");
         exit();
     }else if($_SESSION["role"] == "production"){
-        header("Location: /ISTILO_SYSTEM/production/production.html");
+        header("Location: /ISTILO_SYSTEM/production/production.php");
         exit();
     }else if($_SESSION["role"] == "qa"){
-        header("Location: /ISTILO_SYSTEM/quality_inspect/quality_inspection.html");
+        header("Location: /ISTILO_SYSTEM/quality_inspect/quality_inspection.php");
         exit();
     }else if($_SESSION["role"] == "owner"){
-        header("Location: /ISTILO_SYSTEM/owner_features/dashboard.html");
+        header("Location: /ISTILO_SYSTEM/owner_features/dashboard.php");
         exit();
     }
 }
@@ -52,24 +52,24 @@ if(isset($_POST["login"])){
                 $_SESSION["role"] = $user["role"];
 
                 if($_SESSION["role"] == "admin"){
-                    header("Location: /ISTILO_SYSTEM/admin/admin_panel.html");
+                    header("Location: /ISTILO_SYSTEM/admin/admin_panel.php");
                     exit();
                 }else if($_SESSION["role"] == "layout"){
-                    header("Location: /ISTILO_SYSTEM/layout/layout_artist.html");
+                    header("Location: /ISTILO_SYSTEM/layout/layout_artist.php");
                     exit();
                 }else if($_SESSION["role"] == "production"){
-                    header("Location: /ISTILO_SYSTEM/production/production.html");
+                    header("Location: /ISTILO_SYSTEM/production/production.php");
                     exit();
                 }else if($_SESSION["role"] == "qa"){
-                    header("Location: /ISTILO_SYSTEM/quality_inspect/quality_inspection.html");
+                    header("Location: /ISTILO_SYSTEM/quality_inspect/quality_inspection.php");
                     exit();
                 }else if($_SESSION["role"] == "owner"){
-                    header("Location: /ISTILO_SYSTEM/owner_features/dashboard.html");
+                    header("Location: /ISTILO_SYSTEM/owner_features/dashboard.php");
                     exit();
                 }
             }
         }else{
-            header("Location: login.html");
+            header("Location: login.php");
             exit();
         }
     }
@@ -80,23 +80,29 @@ if(isset($_POST["login"])){
 if(isset($_POST["signup"])){
     $fullname = $_POST["fullname"];
     $username = $_POST["username"];
-    $password = $_POST["password"];
+    $password = strtolower($_POST["password"]);
     $confirm_password = $_POST["confirm-password"];
 
-    // hashing password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    if($password == $confirm_password){
 
-    //storing to database
+        // hashing password
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql_insert = "INSERT INTO users(fullname, username, encrypted_password) VALUES(?,?,?)";
-    $sql_bind = $conn->prepare($sql_insert);
+        //storing to database
 
-    if($sql_bind){
+        $sql_insert = "INSERT INTO users(fullname, username, encrypted_password) VALUES(?,?,?)";
+        $sql_bind = $conn->prepare($sql_insert);
 
-        $sql_bind->bind_param("sss", $fullname, $username, $hashed_password);
-        $sql_bind->execute();
+        if($sql_bind){
+
+            $sql_bind->bind_param("sss", $fullname, $username, $hashed_password);
+            $sql_bind->execute();
+        }
+        header("Location: login.php");
+        exit();
+    }else{
+        echo "Password does not match";
     }
-    header("Location: login.php");
-    exit();
+
 }
 ?>

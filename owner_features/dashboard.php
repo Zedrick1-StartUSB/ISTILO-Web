@@ -1,3 +1,14 @@
+<?php
+session_start();
+require "../logout.php";
+
+if($_SESSION["role"] != "owner"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,18 +29,15 @@
 
             <p class="nav-caption">MENU</p>
             <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link active" href="dashboard.html" aria-current="page">Dashboard</a>
-                <a class="side-link" href="orders.html">Orders</a>
-                <a class="side-link" href="materials.html">Materials</a>
-                <a class="side-link" href="users.html">Users</a>
-                <a class="side-link" href="history_logs.html">History Logs</a>
+                <a class="side-link active" href="dashboard.php" aria-current="page">Dashboard</a>
+                <a class="side-link" href="orders.php">Orders</a>
+                <a class="side-link" href="materials.php">Materials</a>
+                <a class="side-link" href="users.php">Users</a>
+                <a class="side-link" href="history_logs.php">History Logs</a>
+                <form method="POST">
+                    <button class="btn btn-danger" name="logout">Logout</button>
+                </form>
             </nav>
-
-            <a class="profile-link" href="#profile">
-                <span class="avatar">JL</span>
-                <span class="profile-copy"><strong>Jamie Lee</strong><small>Shop owner</small></span>
-                <span class="profile-dots">···</span>
-            </a>
         </aside>
 
         <main class="main-content" id="overview">

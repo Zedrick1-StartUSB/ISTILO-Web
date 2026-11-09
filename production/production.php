@@ -1,3 +1,14 @@
+<?php
+session_start();
+require "../logout.php";
+
+if($_SESSION["role"] != "production"){
+    header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+    exit();
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +29,9 @@
                 <a class="nav-item active" href="#dashboard" aria-current="page"><span>⌂</span> Dashboard</a>
                 <a class="nav-item" href="#incoming"><span>▤</span> Incoming work <b>3</b></a>
                 <a class="nav-item" href="#finished"><span>✓</span> Finished work</a>
+                <form method="POST">
+                    <button class="btn btn-danger" name="logout">Logout</button>
+                </form>
             </nav>
 
             <div class="sidebar-note">
