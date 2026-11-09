@@ -19,7 +19,7 @@ require "../../auth.php";
             <div class="row login-card signup-card">
                 <section class="col-lg-12 form-panel signup-form">
                     <div class="form-content">
-                        <a href="login.html">Return</a>
+                        <a href="login.php">Return</a>
                         <p class="form-kicker">COME ON IN</p>
                         <h2 id="signup-title">Create account</h2>
                         <p class="form-intro">It only takes a minute to get started.</p>

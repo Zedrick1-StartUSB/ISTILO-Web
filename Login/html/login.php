@@ -1,3 +1,8 @@
+<?php
+require "../../auth.php";
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,20 +42,20 @@
                         <h2 id="login-title">Log in</h2>
                         <p class="form-intro">Pick up right where your style left off.</p>
 
-                        <form action="#" method="get">
+                        <form method="POST">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email address</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="you@example.com">
                             </div>
 
                             <div class="mb-2">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" >
                             </div><br>
-                            <button class="btn login-button w-100" type="submit">Log in <span aria-hidden="true">→</span></button>
+                            <button class="btn login-button w-100" type="submit" name="login">Log in <span aria-hidden="true">→</span></button>
                         </form>
 
-                        <p class="signup-prompt">New around here? <a class="text-link signup-link" href="signup.html">Create an account</a></p>
+                        <p class="signup-prompt">New around here? <a class="text-link signup-link" href="signup.php">Create an account</a></p>
                     </div>
                 </section>
             </div>
