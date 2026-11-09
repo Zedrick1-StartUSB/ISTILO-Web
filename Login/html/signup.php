@@ -1,3 +1,7 @@
+<?php
+require "../../auth.php";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,27 +27,23 @@
                         <form action="#" method="post">
                             <div class="row g-3">
                                 <div class="col-sm-12">
-                                    <label for="first-name" class="form-label">First name</label>
-                                    <input type="text" class="form-control" id="first-name" name="first_name" placeholder="Jamie" autocomplete="given-name" required>
-                                </div>
-                                <div class="col-sm-12">
-                                    <label for="last-name" class="form-label">Last name</label>
-                                    <input type="text" class="form-control" id="last-name" name="last_name" placeholder="Lee" autocomplete="family-name" required>
+                                    <label for="first-name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="fullname" name="fullname" placeholder="John Doe" autocomplete="given-name" required>
                                 </div>
                                 <div class="col-12">
                                     <label for="email" class="form-label">Username</label>
-                                    <input type="email" class="form-control" id="username" name="username" placeholder="username" autocomplete="email" required>
+                                    <input type="email" class="form-control" id="username" name="username" placeholder="example@gmail.com" autocomplete="email" required>
                                 </div>
                                 <div class="col-12">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Kindly enter your password" required>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="********" required>
                                 </div>
                                 <div class="col-12">
                                     <label for="confirm-password" class="form-label">Confirm password</label>
-                                    <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Type your password again" autocomplete="new-password" minlength="8" required>
+                                    <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="Type your password again" required>
                                 </div>
                             </div><br>
-                            <button class="btn login-button w-100 signup-button" type="submit">Create my account <span aria-hidden="true">→</span></button>
+                            <button class="btn login-button w-100 signup-button" type="submit" name="signup">Create my account <span aria-hidden="true">→</span></button>
                         </form>
                     </div>
                 </section>

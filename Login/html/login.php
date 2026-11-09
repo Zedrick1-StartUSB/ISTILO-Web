@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f6eee5">
     <title>Login | little label</title>
-    <link rel="stylesheet" href="\bootstrap_template/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../bootstrap_template/css/bootstrap.min.css">
     <link rel="stylesheet" href="../css/login.css">
 </head>
 <body>
