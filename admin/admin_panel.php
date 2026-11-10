@@ -1,5 +1,6 @@
 <?php
 session_start();
+require "admin_backend.php";
 require "../logout.php";
 
 if($_SESSION["role"] != "admin"){
@@ -36,55 +37,54 @@ if($_SESSION["role"] != "admin"){
                     <p class="heading-copy">Create a new job order invoice or check one you made earlier.</p>
                 </div>
             </header>
-<div class="view-switch" role="tablist" aria-label="Invoice pages">
-    <input class="view-radio" type="radio" name="invoice-view" id="view-create" checked>
-    <input class="view-radio" type="radio" name="invoice-view" id="view-logs">
-    <div class="view-buttons">
-        <label class="view-button" for="view-create" role="tab">＋ &nbsp;Create invoice</label>
-        <label class="view-button" for="view-logs" role="tab">▤ &nbsp;Invoice logs</label>
-    </div>
+            <div class="view-switch" role="tablist" aria-label="Invoice pages">
+                <input class="view-radio" type="radio" name="invoice-view" id="view-create" checked>
+                <input class="view-radio" type="radio" name="invoice-view" id="view-logs">
+                <div class="view-buttons">
+                    <label class="view-button" for="view-create" role="tab">＋ &nbsp;Create invoice</label>
+                    <label class="view-button" for="view-logs" role="tab">▤ &nbsp;Invoice logs</label>
+                </div>
 
-    <div class="view-panels">
-        <section class="view-panel create-panel" id="create-invoice" role="tabpanel" aria-labelledby="view-create">
-            <div class="form-intro">
-                <span class="intro-icon">✎</span>
-                <div>
+                <div class="view-panels">
+                    <section class="view-panel create-panel" id="create-invoice" role="tabpanel" aria-labelledby="view-create">
+                        <div class="form-intro">
+                            <span class="intro-icon">✎</span>
+                            <div>
                                 <p class="panel-kicker">NEW JOB ORDER</p>
                                 <h2>Create invoice</h2>
                                 <p>Enter the customer and job order details below.</p>
-                                </div>
-                                </div>
-                                
-                                <form class="invoice-form" action="#" method="get">
-                                    <section class="form-card" aria-labelledby="customer-heading">
-                                        <div class="card-heading">
-                                            <span class="step-number">01</span>
-                                            <div>
+                            </div>
+                        </div>
+
+                        <form class="invoice-form" action="#" method="POST">
+                            <section class="form-card" aria-labelledby="customer-heading">
+                                <div class="card-heading">
+                                    <span class="step-number">01</span>
+                                    <div>
                                         <h3 id="customer-heading">Customer information</h3>
                                         <p>Who is this job order for?</p>
-                                        </div>
-                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="customer-name" class="form-label">Customer name</label>
-                                        <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="Enter customer name"
-                                            required>
-                                        </div>
-                                        <div class="col-md-6">
+                                        <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="Enter customer name" >
+                                    </div>
+                                    <div class="col-md-6">
                                         <label for="customer-number" class="form-label">Contact number</label>
-                                        <input type="tel" class="form-control" id="customer-number" name="customer_number" placeholder="09XX XXX XXXX" required>
-                                        </div>
+                                        <input type="tel" class="form-control" id="customer-number" name="customer_number" placeholder="09XX XXX XXXX">
+                                    </div>
                                     <div class="col-md-7">
                                         <label for="shipping-address" class="form-label">Address</label>
                                         <input type="text" class="form-control" id="shipping-address" name="shipping_address"
-                                            placeholder="House number, street, barangay" required>
+                                            placeholder="House number, street, barangay">
                                     </div>
                                     <div class="col-md-5">
                                         <label for="landmarks" class="form-label">Nearby landmark <span class="optional">(optional)</span></label>
                                         <input type="text" class="form-control" id="landmarks" name="landmarks" placeholder="e.g. Near the town plaza">
                                     </div>
-                                    </div>
-                                    </section>
+                                </div>
+                            </section>
 
                             <section class="form-card" aria-labelledby="job-heading">
                                 <div class="card-heading">
@@ -92,23 +92,21 @@ if($_SESSION["role"] != "admin"){
                                     <div>
                                         <h3 id="job-heading">Job order details</h3>
                                         <p>Add the requested item and quantity.</p>
-                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-md-8">
-                                        <label for="product-name" class="form-label">Product or service</label>
-                                        <input type="text" class="form-control" id="product-name" name="product" placeholder="What are we making?"
-                                            required>
+                                        <label for="product-name" class="form-label">Service/s Offered | Accepted </label>
+                                        <input type="text" class="form-control" id="product-name" name="product-service" placeholder="What are we making?">
                                     </div>
                                     <div class="col-md-4">
                                         <label for="quantity" class="form-label">Quantity</label>
-                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" placeholder="Enter quantity"
-                                            required>
+                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" placeholder="Enter quantity" >
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="unit-price" class="form-label">Price per item (₱)</label>
-                                        <input type="number" class="form-control" id="unit-price" name="unit_price" min="0" step="0.01" placeholder="0.00"
-                                            required>
+                                        <label for="unit-price" class="form-label">Total Amount(₱)</label>
+                                        <input type="text" class="form-control" id="total-price" name="total-price" placeholder="Agreed Price (Peso)"
+                                            >
                                     </div>
                                     <div class="col-md-6">
                                         <label for="due-date" class="form-label">Target completion date</label>
@@ -119,8 +117,8 @@ if($_SESSION["role"] != "admin"){
                                         <textarea class="form-control" id="job-notes" name="notes" rows="3"
                                             placeholder="Add sizes, colors, special instructions, or other details..."></textarea>
                                     </div>
-                                    </div>
-                                    </section>
+                                </div>
+                            </section>
 
                             <section class="form-card" aria-labelledby="image-heading">
                                 <div class="card-heading">
@@ -133,17 +131,18 @@ if($_SESSION["role"] != "admin"){
                                 <label for="reference-image" class="upload-area">
                                     <span class="upload-icon">↑</span>
                                     <span><strong>Choose an image to upload</strong><small>PNG, JPG, or JPEG</small></span>
-                                    <input type="file" id="reference-image" name="reference_image" accept="image/png,image/jpeg">
+                                    <input type="file" id="reference_image" name="reference_image" accept="image/png,image/jpeg" name="reference-image">
+                                    
                                 </label>
-                                </section>
-                                
-                                <div class="form-actions">
-                                    <button class="btn clear-button" type="reset">Clear form</button>
-                                    <button class="btn submit-button" type="submit">Create invoice <span aria-hidden="true">→</span></button>
-                                </div>
-                                </form>
+                            </section>
+
+                            <div class="form-actions">
+								<button class="btn clear-button" type="reset">Clear form</button>
+								<button class="btn submit-button" type="submit" name="create-invoice">Create invoice <span aria-hidden="true">→</span></button>
+                            </div>
+                        </form>
                     </section>
-                    
+
                     <section class="view-panel logs-panel" id="invoice-logs" role="tabpanel" aria-labelledby="view-logs">
                         <div class="logs-intro">
                             <div>
@@ -153,7 +152,7 @@ if($_SESSION["role"] != "admin"){
                             </div>
                             <span class="record-count">4 records</span>
                         </div>
-                    
+
                         <div class="log-filters">
                             <label for="log-search" class="visually-hidden">Search invoices</label>
                             <input class="form-control search-input" id="log-search" type="search"
@@ -166,26 +165,26 @@ if($_SESSION["role"] != "admin"){
                                 <option>Completed</option>
                             </select>
                         </div>
-<div class="table-responsive">
-    <table class="table invoice-table align-middle mb-0">
-        <thead>
-            <tr>
-                <th scope="col">INVOICE NO.</th>
-                <th scope="col">CUSTOMER</th>
-                <th scope="col">JOB ORDER</th>
-                <th scope="col">DATE CREATED</th>
-                <th scope="col">TOTAL</th>
-                <th scope="col">STATUS</th>
-            </tr>
-        </thead>
-        <tbody>
-        
-        </tbody>
-    </table>
+                        <div class="table-responsive">
+                            <table class="table invoice-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">INVOICE NO.</th>
+                                        <th scope="col">CUSTOMER</th>
+                                        <th scope="col">JOB ORDER</th>
+                                        <th scope="col">DATE CREATED</th>
+                                        <th scope="col">TOTAL</th>
+                                        <th scope="col">STATUS</th>
+                                        <th scope="col">PASS TO</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         </div>
                     </section>
                 </div>
-                </div>
+            </div>
         </main>
     </div>
 </body>
