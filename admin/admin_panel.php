@@ -171,14 +171,24 @@ if($_SESSION["role"] != "admin"){
                                     <tr>
                                         <th scope="col">INVOICE NO.</th>
                                         <th scope="col">CUSTOMER</th>
-                                        <th scope="col">JOB ORDER</th>
-                                        <th scope="col">DATE CREATED</th>
                                         <th scope="col">TOTAL</th>
-                                        <th scope="col">STATUS</th>
                                         <th scope="col">PASS TO</th>
+                                        <th scope="col">ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+									<?php
+										while($row = $select_invoice_sql->fetch_assoc()){
+											echo "<tr>";
+											echo "<td>". $row['invoice_id'] . "</td>";
+											echo "<td>". $row['customer_name'] . "</td>";
+											echo "<td>". $row['price'] . "</td>";
+											echo "<td>". '<select><option>Layout Department</option> <option>Production Department</option></select>'  . "</td>";
+											echo "<td>" . '<button>Send</button>' . "</td>"; 
+											echo "</tr>";
+										}
+									
+									?>
                                 </tbody>
                             </table>
                         </div>

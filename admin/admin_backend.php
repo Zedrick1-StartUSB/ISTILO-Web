@@ -22,5 +22,8 @@ if(isset($_POST['create-invoice'])){
     
 }
 
+$select_invoice_sql = $conn->query("SELECT * FROM admin_invoices");
+
+
 
 ?>
