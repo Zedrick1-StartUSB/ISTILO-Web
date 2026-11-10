@@ -384,6 +384,44 @@ textarea.form-control {
     outline-offset: 2px;
 }
 
+.reference-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    color: #4c5c51;
+    font-size: 10px;
+}
+
+.reference-preview:empty {
+    display: none;
+}
+
+.reference-preview img {
+    width: 52px;
+    height: 52px;
+    border: 1px solid #dfe7e0;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.invoice-message {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.invoice-message-error {
+    color: #842029;
+    background: #f8d7da;
+}
+
+.invoice-message-success {
+    color: #0f5132;
+    background: #d1e7dd;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;

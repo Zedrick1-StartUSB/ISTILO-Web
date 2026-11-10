@@ -18,6 +18,7 @@ if($_SESSION["role"] != "admin"){
     <title>Admin Panel | Istilo@Nasugbu Enterprises</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
     <link rel="stylesheet" href="admin_panel.css">
+    <script src="admin_panel.js" defer></script>
 </head>
 <body>
     <div class="admin-app">
@@ -56,7 +57,12 @@ if($_SESSION["role"] != "admin"){
                             </div>
                         </div>
 
-                        <form class="invoice-form" action="#" method="POST">
+                        <form class="invoice-form" action="" method="POST" enctype="multipart/form-data">
+                            <?php if (!empty($invoice_error)): ?>
+                                <p class="invoice-message invoice-message-error" role="alert"><?= htmlspecialchars($invoice_error, ENT_QUOTES, "UTF-8") ?></p>
+                            <?php elseif (!empty($invoice_success)): ?>
+                                <p class="invoice-message invoice-message-success" role="status"><?= htmlspecialchars($invoice_success, ENT_QUOTES, "UTF-8") ?></p>
+                            <?php endif; ?>
                             <section class="form-card" aria-labelledby="customer-heading">
                                 <div class="card-heading">
                                     <span class="step-number">01</span>
@@ -131,9 +137,9 @@ if($_SESSION["role"] != "admin"){
                                 <label for="reference-image" class="upload-area">
                                     <span class="upload-icon">↑</span>
                                     <span><strong>Choose an image to upload</strong><small>PNG, JPG, or JPEG</small></span>
-                                    <input type="file" id="reference_image" name="reference_image" accept="image/png,image/jpeg" name="reference-image">
-                                    
+                                    <input type="file" id="reference-image" name="reference_image" accept="image/png,image/jpeg" data-max-size="5242880">
                                 </label>
+                                <div class="reference-preview" id="reference-image-preview" aria-live="polite"></div>
                             </section>
 
                             <div class="form-actions">
