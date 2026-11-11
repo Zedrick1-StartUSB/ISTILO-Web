@@ -87,6 +87,7 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin" && isset($_POST["c
             } else {
                 throw new mysqli_sql_exception($bind_invoice_sql->error);
             }
+
         } catch (mysqli_sql_exception $exception) {
             if ($uploadedFilePath !== null && file_exists($uploadedFilePath)) {
                 unlink($uploadedFilePath);
@@ -95,6 +96,10 @@ if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin" && isset($_POST["c
             $invoice_error = "The invoice could not be saved. Please check the entered information and try again.";
         }
     }
+
+    $insert_layout = "INSERT INTO layout_artist_incoming (invoice_id) SELECT invoice_id FROM admin_invoices WHERE invoice_id NOT IN (SELECT invoice_id FROM layout_artist_incoming)";
+    $query_insert_layout = $conn->query($insert_layout);
+
 }
 
 $select_invoice_sql = $conn->query("SELECT * FROM admin_invoices");

@@ -183,18 +183,25 @@ if($_SESSION["role"] != "admin"){
                                     </tr>
                                 </thead>
                                 <tbody>
-									<?php
-										while($row = $select_invoice_sql->fetch_assoc()){
-											echo "<tr>";
-											echo "<td>". $row['invoice_id'] . "</td>";
-											echo "<td>". $row['customer_name'] . "</td>";
-											echo "<td>". $row['price'] . "</td>";
-											echo "<td>". '<select><option>Layout Department</option> <option>Production Department</option></select>'  . "</td>";
-											echo "<td>" . '<button>Send</button>' . "</td>"; 
-											echo "</tr>";
-										}
-									
-									?>
+									<?php while($row = $select_invoice_sql->fetch_assoc()): ?>
+                                        <tr>
+                                            <td> <?= htmlspecialchars($row["invoice_id"]) ?> </td>
+                                            <td> <?= htmlspecialchars($row["customer_name"]) ?> </td>
+                                            <td> <?= htmlspecialchars($row["price"]) ?> </td>
+                                            <td>
+                                                <select name="department" class="form-select form-select-sm">
+                                                    <option value="" selected disabled>Select Department</option>
+                                                    <option value="">Layout Artists</option>
+                                                    <option value="">Production</option>
+                                                    <option value="">Quality Inspection</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-success">Send</button>
+                                            </td>
+                                        </tr>
+
+									<?php  endwhile; ?>
                                 </tbody>
                             </table>
                         </div>
