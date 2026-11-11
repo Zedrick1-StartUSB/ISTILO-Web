@@ -237,6 +237,53 @@ a { color: inherit; text-decoration: none; }
     background: var(--paper);
 }
 
+.production-invoice-panel { overflow: hidden; }
+
+.production-invoice-list {
+    min-width: 860px;
+    color: #5b534b;
+    font-size: 12px;
+}
+
+.production-invoice-list th {
+    background: #f7f7f0;
+    color: #928a82;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.production-invoice-list th,
+.production-invoice-list td {
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+.production-file-link {
+    display: inline-block;
+    padding: 6px 10px;
+    border: 1px solid #dfe5d6;
+    border-radius: 6px;
+    background: #f3f5ed;
+    color: #61744f;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.production-file-link:hover {
+    border-color: #cbd6bd;
+    background: #e9eee1;
+    color: #44583a;
+}
+
+.production-empty-state {
+    padding: 24px 16px !important;
+    color: var(--muted);
+    text-align: center;
+}
+
 .job-list,
 .job-detail { padding: 16px; }
 
@@ -476,6 +523,7 @@ a { color: inherit; text-decoration: none; }
     .production-content { grid-template-columns: 1fr; }
     .job-detail { grid-row: 1; }
     .job-list { grid-row: 2; }
+
 }
 
 @media (max-width: 480px) {
