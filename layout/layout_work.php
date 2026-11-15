@@ -53,19 +53,10 @@ require "layout_backend.php";
                         <p class="header-subtitle">Review new work and manage your jobs in progress.</p>
                     </div>
                 </header>
-
                 <?php if ($layout_action_error !== ""): ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?= htmlspecialchars($layout_action_error) ?>
-                    </div>
-                <?php elseif (isset($_GET["accepted"]) && $_GET["accepted"] === "1"): ?>
-                    <div class="alert alert-success" role="status">
-                        Work accepted and moved to your working invoices.
-                    </div>
-                <?php elseif (isset($_GET["sent"]) && $_GET["sent"] === "1"): ?>
-                    <div class="alert alert-success" role="status">
-                        The file was sent successfully.
-                    </div>
+                    <p class="invoice-message invoice-message-error" role="alert"><?= htmlspecialchars($layout_action_error, ENT_QUOTES, "UTF-8") ?></p>
+                <?php elseif ($layout_action_success !== ""): ?>
+                    <p class="invoice-message invoice-message-success" role="status"><?= htmlspecialchars($layout_action_success, ENT_QUOTES, "UTF-8") ?></p>
                 <?php endif; ?>
 
                 <section class="panel dashboard-panel invoice-panel">
@@ -89,28 +80,26 @@ require "layout_backend.php";
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($query_incoming_invoices !== false && $query_incoming_invoices->num_rows > 0): ?>
-                                    <?php while ($row = $query_incoming_invoices->fetch_assoc()): ?>
+                                <?php if ($layout_incoming_error !== ""): ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($layout_incoming_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($layout_incoming_rows) > 0): ?>
+                                    <?php foreach ($layout_incoming_rows as $row): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($row["invoice_id"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["customer_name"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["services"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["quantity"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["completion_date"] ?? '') ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
                                             <td>
                                                 <form method="post">
-                                                    <button class="btn btn-success" type="submit" name="accept" value="<?= htmlspecialchars($row["layout_id"]) ?>">Accept Work</button>
+                                                    <button class="btn btn-success" type="submit" name="accept" value="<?= htmlspecialchars((string) ($row["layout_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Accept Work</button>
                                                 </form>
                                             </td>
                                         </tr>
-                                    <?php endwhile; ?>
-                                <?php elseif ($query_incoming_invoices !== false): ?>
-                                    <tr>
-                                        <td colspan="6">No incoming invoices found.</td>
-                                    </tr>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6">Incoming invoices could not be loaded.</td>
+                                        <td colspan="6">No incoming invoices found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -141,14 +130,16 @@ require "layout_backend.php";
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($query_working_invoices !== false && $query_working_invoices->num_rows > 0): ?>
-                                    <?php while ($row = $query_working_invoices->fetch_assoc()): ?>
+                                <?php if ($layout_working_error !== ""): ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($layout_working_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($layout_working_rows) > 0): ?>
+                                    <?php foreach ($layout_working_rows as $row): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($row["invoice_id"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["customer_name"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["services"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["quantity"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["completion_date"] ?? '') ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
                                             <td>
                                                 <?php
                                                 $referenceFileName = basename((string) ($row["file"] ?? ""));
@@ -167,16 +158,16 @@ require "layout_backend.php";
                                                         type="button"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#viewWorkModal"
-                                                        data-invoice="<?= htmlspecialchars($row["invoice_id"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-customer="<?= htmlspecialchars($row["customer_name"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-contact="<?= htmlspecialchars($row["contact_number"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-address="<?= htmlspecialchars($row["customer_address"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-landmarks="<?= htmlspecialchars($row["landmarks"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-service="<?= htmlspecialchars($row["services"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-quantity="<?= htmlspecialchars($row["quantity"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-price="<?= htmlspecialchars($row["price"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-due="<?= htmlspecialchars($row["completion_date"] ?? "", ENT_QUOTES, "UTF-8") ?>"
-                                                        data-notes="<?= htmlspecialchars($row["notes"] ?? "", ENT_QUOTES, "UTF-8") ?>"
+                                                        data-invoice="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-customer="<?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-contact="<?= htmlspecialchars((string) ($row["contact_number"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-address="<?= htmlspecialchars((string) ($row["customer_address"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-landmarks="<?= htmlspecialchars((string) ($row["landmarks"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-service="<?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-quantity="<?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-price="<?= htmlspecialchars((string) ($row["price"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-due="<?= htmlspecialchars((string) ($row["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                        data-notes="<?= htmlspecialchars((string) ($row["notes"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
                                                         data-file="<?= htmlspecialchars($referenceFileUrl, ENT_QUOTES, "UTF-8") ?>"
                                                     >View</button>
                                                     <button
@@ -184,19 +175,15 @@ require "layout_backend.php";
                                                         type="button"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#sendWorkModal"
-                                                        data-invoice="<?= htmlspecialchars($row["invoice_id"] ?? "", ENT_QUOTES, "UTF-8") ?>"
+                                                        data-invoice="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
                                                     >Send</button>
                                                 </div>
                                             </td>
                                         </tr>
-                                    <?php endwhile; ?>
-                                <?php elseif ($query_working_invoices !== false): ?>
-                                    <tr>
-                                        <td colspan="6">No working invoices found.</td>
-                                    </tr>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6">Working invoices could not be loaded.</td>
+                                        <td colspan="6">No working invoices found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

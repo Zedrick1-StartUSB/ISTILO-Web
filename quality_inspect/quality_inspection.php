@@ -2,11 +2,12 @@
 session_start();
 require "../logout.php";
 
-if($_SESSION["role"] != "qa"){
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "qa") {
     header("Location: /ISTILO_SYSTEM/Login/html/login.php");
     exit();
 }
 
+require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
 ?>
 
 <!DOCTYPE html>
@@ -14,154 +15,116 @@ if($_SESSION["role"] != "qa"){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f5f6f2">
-    <title>Quality Check Desk</title>
+    <meta name="theme-color" content="#f6f5ef">
+    <title>Quality Assurance Desk</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
-    <link rel="stylesheet" href="quality_inspection.css">
+    <link rel="stylesheet" href="../production/production.css">
 </head>
 <body>
-    <div class="quality-app">
-        <aside class="quality-sidebar">
-            <a class="quality-brand" href="#dashboard"><span class="brand-stamp">q.</span><span>good form<small>QUALITY CHECK DESK</small></span></a>
-            <p class="sidebar-label">MY DESK</p>
-            <nav class="quality-nav" aria-label="Quality inspection workspace">
-                <a class="quality-nav-link current" href="#dashboard" aria-current="page"><span>⌂</span> Dashboard</a>
-                <a class="quality-nav-link" href="#incoming"><span>◉</span> Incoming work <b>3</b></a>
-                <a class="quality-nav-link" href="#finished"><span>✓</span> Finished work</a>
+    <div class="production-app">
+        <aside class="production-sidebar">
+            <p class="side-label">YOUR WORK</p>
+            <nav class="production-nav" aria-label="Quality assurance workspace">
+                <a class="nav-item active" href="#incoming" aria-current="page">Job Orders</a>
                 <form method="POST">
-                    <button class="btn btn-danger" name="logout">Logout</button>
+                    <button class="btn btn-danger" name="logout" type="submit">Logout</button>
                 </form>
             </nav>
-            <div class="quality-reminder">
-                <span aria-hidden="true">✦</span>
-                <p><strong>Little details matter.</strong><br>A careful check makes a happy customer.</p>
-            </div>
-            <div class="inspector-profile">
-                <span class="inspector-avatar">TC</span>
-                <span><strong>Taylor Chen</strong><small>Quality inspector</small></span>
-            </div>
         </aside>
 
-        <main class="quality-main">
-            <section class="screen-section" id="dashboard" aria-labelledby="dashboard-title">
-                <header class="quality-header"><div><p class="date-label">WEDNESDAY, JUNE 03, 2026</p><h1 id="dashboard-title">Inspection dashboard <span aria-hidden="true">✦</span></h1><p class="header-copy">A quick overview of work waiting for your careful check.</p></div><span class="inspection-status"><span></span> Ready to inspect</span></header>
-                <section class="quality-stats" aria-label="Inspection overview">
-                    <article class="quality-stat stat-cream"><span>Incoming work</span><strong>3</strong><small>Ready for inspection</small></article>
-                    <article class="quality-stat stat-blue"><span>Being inspected</span><strong>1</strong><small>On your table</small></article>
-                    <article class="quality-stat stat-green"><span>Finished today</span><strong>6</strong><small>Checks completed</small></article>
+        <main class="production-main">
+            <section class="screen-section" id="incoming" aria-labelledby="qa-title">
+                <header class="welcome-header">
+                    <div>
+                        <p class="overline">QUALITY ASSURANCE · FROM PRODUCTION</p>
+                        <h1 id="qa-title">Quality Check Desk</h1>
+                        <p class="welcome-subtitle">Review job orders sent by Production and manage accepted QA work.</p>
+                    </div>
+                    <div class="work-status"><span></span> Ready to inspect</div>
+                </header>
+
+                <?php if ($qa_action_error !== ""): ?>
+                    <p class="alert alert-danger" role="alert"><?= htmlspecialchars($qa_action_error, ENT_QUOTES, "UTF-8") ?></p>
+                <?php elseif ($qa_action_success !== ""): ?>
+                    <p class="alert alert-success" role="status"><?= htmlspecialchars($qa_action_success, ENT_QUOTES, "UTF-8") ?></p>
+                <?php endif; ?>
+
+                <section class="card-surface production-invoice-panel mb-4" aria-labelledby="qa-incoming-title">
+                    <div class="p-3 border-bottom">
+                        <h2 class="h5 mb-0" id="qa-incoming-title">Incoming from Production</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table production-invoice-list qa-invoice-list qa-incoming-list mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Invoice ID</th>
+                                    <th scope="col">Customer</th>
+                                    <th scope="col">Service</th>
+                                    <th scope="col">Qty</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($qa_incoming_error !== ""): ?>
+                                    <tr><td colspan="5" class="production-empty-state"><?= htmlspecialchars($qa_incoming_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($qa_incoming_rows) > 0): ?>
+                                    <?php foreach ($qa_incoming_rows as $row): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? "Invoice details unavailable"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td>
+                                                <form method="post">
+                                                    <button class="btn btn-success btn-sm" type="submit" name="accept" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Accept</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr><td colspan="5" class="production-empty-state">No incoming invoices have been sent to Quality Assurance.</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
-                <section class="panel dashboard-panel">
-                    <div class="panel-heading"><div><p class="section-kicker">YOUR DESK</p><h2>Today's overview</h2><p>Review incoming items and recent inspection results.</p></div></div>
-                    <div class="dashboard-task-row"><span class="mini-task-icon">◉</span><span><strong>Next up: Everyday Tee</strong><small>#TF-2084 · 24 pieces · Sent by Production</small></span><a class="dashboard-link" href="#incoming">Open incoming work →</a></div>
-                    <div class="dashboard-task-row"><span class="mini-task-icon icon-sage">✓</span><span><strong>Recently checked: Weekend Tote</strong><small>#TF-2078 · Inspection passed</small></span><a class="dashboard-link" href="#finished">See finished work →</a></div>
-                    <div class="dashboard-note"><span>✦</span><p><strong>Quality reminder</strong><br>Record a clear note whenever an item needs another look.</p></div>
-                </section>
-            </section>
 
-            <section class="screen-section" id="incoming" aria-label="Incoming quality inspection work">
-            <header class="quality-header">
-                <div>
-                    <p class="date-label">WEDNESDAY, JUNE 03, 2026</p>
-                    <h1>Quality check desk <span aria-hidden="true">✦</span></h1>
-                    <p class="header-copy">Production has sent these finished pieces for a careful look.</p>
-                </div>
-                <span class="inspection-status"><span></span> Ready to inspect</span>
-            </header>
-
-            <section class="quality-stats" aria-label="Inspection overview">
-                <article class="quality-stat stat-cream"><span>Waiting for a check</span><strong>3</strong><small>From Production</small></article>
-                <article class="quality-stat stat-blue"><span>Being inspected</span><strong>1</strong><small>On your table</small></article>
-                <article class="quality-stat stat-green"><span>Checked today</span><strong>6</strong><small>Nice work so far</small></article>
-            </section>
-
-            <div class="quality-layout">
-                <section class="inspection-queue panel" id="inspection-queue" aria-labelledby="queue-title">
-                    <div class="panel-heading">
-                        <div><p class="section-kicker">FROM PRODUCTION</p><h2 id="queue-title">Inspection queue</h2><p>Completed work ready for a quality check.</p></div>
-                        <span class="queue-count">3 jobs</span>
+                <section class="card-surface production-invoice-panel" aria-labelledby="qa-work-title">
+                    <div class="p-3 border-bottom">
+                        <h2 class="h5 mb-0" id="qa-work-title">QA Work</h2>
                     </div>
-
-                    <a class="inspection-row selected" href="#inspection-details">
-                        <span class="product-color tee-color">TEE</span>
-                        <span class="inspection-copy"><strong>Everyday Tee</strong><small>#TF-2084 · 24 pieces</small><span><i class="status-pill status-waiting">Needs check</i> Sent 10:32 AM</span></span>
-                        <span class="row-arrow">›</span>
-                    </a>
-                    <a class="inspection-row" href="#inspection-details">
-                        <span class="product-color tote-color">TOTE</span>
-                        <span class="inspection-copy"><strong>Weekend Tote</strong><small>#TF-2081 · 12 pieces</small><span><i class="status-pill status-review">In review</i> Sent 9:15 AM</span></span>
-                        <span class="row-arrow">›</span>
-                    </a>
-                    <a class="inspection-row" href="#inspection-details">
-                        <span class="product-color knit-color">KNIT</span>
-                        <span class="inspection-copy"><strong>Cozy Knit Cardigan</strong><small>#TF-2079 · 8 pieces</small><span><i class="status-pill status-waiting">Needs check</i> Sent yesterday</span></span>
-                        <span class="row-arrow">›</span>
-                    </a>
-                </section>
-
-                <section class="inspection-detail panel" id="inspection-details" aria-labelledby="detail-title">
-                    <div class="detail-heading">
-                        <div><p class="section-kicker">SELECTED JOB · #TF-2084</p><h2 id="detail-title">Everyday Tee</h2></div>
-                        <span class="status-pill status-waiting">Needs check</span>
+                    <div class="table-responsive">
+                        <table class="table production-invoice-list qa-invoice-list qa-work-list mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Invoice ID</th>
+                                    <th scope="col">Customer</th>
+                                    <th scope="col">Service</th>
+                                    <th scope="col">Qty</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($qa_working_error !== ""): ?>
+                                    <tr><td colspan="5" class="production-empty-state"><?= htmlspecialchars($qa_working_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($qa_working_rows) > 0): ?>
+                                    <?php foreach ($qa_working_rows as $row): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? "Invoice details unavailable"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><button class="btn btn-success btn-sm" type="button">Complete</button></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr><td colspan="5" class="production-empty-state">No QA work has been accepted yet.</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="item-preview" role="img" aria-label="Preview of the Everyday Tee submitted for quality inspection">
-                        <div class="preview-circle"></div>
-                        <div class="preview-shirt"><span>little<br>things</span></div>
-                        <span class="preview-caption">Finished sample · front view</span>
-                    </div>
-
-                    <div class="production-info">
-                        <div><span>Sent by</span><strong>Morgan Reed <small>· Production</small></strong></div>
-                        <div><span>Quantity</span><strong>24 pieces</strong></div>
-                        <div><span>Colors</span><strong>Natural, dusty rose</strong></div>
-                        <div><span>Submitted</span><strong>June 03 · 10:32 AM</strong></div>
-                    </div>
-
-                    <div class="production-note">
-                        <span aria-hidden="true">“</span>
-                        <div><strong>Production update</strong><p>All 24 pieces are finished. Print placement and seams have been checked on the sample.</p></div>
-                    </div>
-
-                    <form class="inspection-form" action="#" method="get">
-                        <p class="checklist-heading">INSPECTION CHECKLIST</p>
-                        <label><input type="checkbox" name="check_stitching"> Stitching and seams look neat</label>
-                        <label><input type="checkbox" name="check_print"> Print placement matches approved layout</label>
-                        <label><input type="checkbox" name="check_quantity"> Quantity and color options are correct</label>
-
-                        <label for="inspection-result" class="form-label result-label">Inspection result</label>
-                        <select class="form-select" id="inspection-result" name="inspection_result" required>
-                            <option value="" selected disabled>Choose a result</option>
-                            <option value="passed">Passed - ready to move on</option>
-                            <option value="changes">Needs changes - send back</option>
-                        </select>
-                        <label for="inspection-note" class="form-label note-label">Message for Production <span>(optional)</span></label>
-                        <textarea class="form-control" id="inspection-note" name="message" rows="2" placeholder="Share your check results or list a change to make..."></textarea>
-                        <button class="btn send-back-button w-100" type="submit">Send update to Production <span aria-hidden="true">↗</span></button>
-                        <p class="form-hint">Use this to approve the pieces or send feedback back to the Production team.</p>
-                    </form>
-
-                    <form class="reply-form" id="team-message" action="#" method="get">
-                        <div class="reply-heading"><span aria-hidden="true">↔</span><div><strong>Message from Production</strong><p>Keep the conversation going both ways.</p></div></div>
-                        <label for="reply-message" class="form-label">Reply to Morgan</label>
-                        <textarea class="form-control" id="reply-message" name="reply" rows="2" placeholder="Ask a question or send an update..."></textarea>
-                        <button class="btn reply-button" type="submit">Send reply <span aria-hidden="true">→</span></button>
-                    </form>
-                </section>
-            </div>
-            </section>
-
-            <section class="screen-section" id="finished" aria-labelledby="finished-title">
-                <header class="quality-header"><div><p class="date-label">QUALITY CHECK DESK · RECENT COMPLETIONS</p><h1 id="finished-title">Finished work</h1><p class="header-copy">Inspection decisions and completed checks.</p></div><span class="inspection-status"><span></span> 6 checked today</span></header>
-                <section class="panel finished-panel">
-                    <div class="panel-heading"><div><p class="section-kicker">COMPLETED INSPECTIONS</p><h2>Check history</h2><p>Recent items reviewed by Quality Inspection.</p></div><span class="queue-count">6 total</span></div>
-                    <div class="finished-item"><span class="product-color tote-color">TOTE</span><span class="finished-copy"><strong>Weekend Tote</strong><small>#TF-2078 · 12 pieces inspected</small><span>Completed Jun 03 · Passed inspection</span></span><span class="finished-badge">Passed</span></div>
-                    <div class="finished-item"><span class="product-color tee-color">TEE</span><span class="finished-copy"><strong>Everyday Tee</strong><small>#TF-2075 · 18 pieces inspected</small><span>Completed Jun 02 · Sent with a note</span></span><span class="finished-badge">Passed</span></div>
-                    <div class="finished-item"><span class="product-color knit-color">KNIT</span><span class="finished-copy"><strong>Cozy Knit Cardigan</strong><small>#TF-2071 · 8 pieces inspected</small><span>Completed Jun 01 · Returned for a small fix</span></span><span class="finished-badge needs-fix">Needs changes</span></div>
-                    <div class="finished-footer"><span aria-hidden="true">✦</span> Every check helps the team make something better.</div>
                 </section>
             </section>
-
-            <footer class="quality-footer">A little care goes a long way <span aria-hidden="true">♡</span></footer>
         </main>
     </div>
 </body>

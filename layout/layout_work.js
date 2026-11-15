@@ -1,52 +1,65 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const viewModal = document.getElementById("viewWorkModal");
-    const sendModal = document.getElementById("sendWorkModal");
+document.addEventListener("DOMContentLoaded", function () {
+    var viewModal = document.getElementById("viewWorkModal");
+    if (viewModal) {
+        viewModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
 
-    viewModal.addEventListener("show.bs.modal", (event) => {
-        const button = event.relatedTarget;
-        const details = [
-            "invoice",
-            "customer",
-            "contact",
-            "service",
-            "quantity",
-            "price",
-            "due",
-            "address",
-            "landmarks",
-            "notes",
-        ];
+            var details = {
+                invoice: trigger.dataset.invoice || "",
+                customer: trigger.dataset.customer || "",
+                contact: trigger.dataset.contact || "",
+                address: trigger.dataset.address || "",
+                landmarks: trigger.dataset.landmarks || "",
+                service: trigger.dataset.service || "",
+                quantity: trigger.dataset.quantity || "",
+                price: trigger.dataset.price || "",
+                due: trigger.dataset.due || "",
+                notes: trigger.dataset.notes || ""
+            };
 
-        details.forEach((key) => {
-            const value = button.dataset[key] || "";
-            const detail = viewModal.querySelector(`[data-work-detail="${key}"]`);
-            detail.textContent = value.trim() || "Not provided";
+            Object.keys(details).forEach(function (key) {
+                var target = viewModal.querySelector('[data-work-detail="' + key + '"]');
+                if (target) {
+                    target.textContent = details[key];
+                }
+            });
+
+            var referenceUrl = trigger.dataset.file || "";
+            var referenceSection = document.getElementById("workReferenceSection");
+            var referenceEmpty = document.getElementById("workReferenceEmpty");
+            var referenceLink = document.getElementById("workReferenceLink");
+            var referenceImage = document.getElementById("workReferenceImage");
+
+            if (referenceUrl) {
+                referenceLink.href = referenceUrl;
+                referenceImage.src = referenceUrl;
+                referenceSection.hidden = false;
+                referenceEmpty.hidden = true;
+            } else {
+                referenceImage.removeAttribute("src");
+                referenceLink.removeAttribute("href");
+                referenceSection.hidden = true;
+                referenceEmpty.hidden = false;
+            }
         });
+    }
 
-        const fileUrl = button.dataset.file || "";
-        const referenceSection = document.getElementById("workReferenceSection");
-        const referenceEmpty = document.getElementById("workReferenceEmpty");
-        const referenceImage = document.getElementById("workReferenceImage");
-        const referenceLink = document.getElementById("workReferenceLink");
+    var sendModal = document.getElementById("sendWorkModal");
+    if (sendModal) {
+        sendModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) {
+                return;
+            }
 
-        referenceSection.hidden = !fileUrl;
-        referenceEmpty.hidden = Boolean(fileUrl);
-        if (fileUrl) {
-            referenceImage.src = fileUrl;
-            referenceLink.href = fileUrl;
-        } else {
-            referenceImage.removeAttribute("src");
-            referenceLink.removeAttribute("href");
-        }
-    });
-
-    sendModal.addEventListener("show.bs.modal", (event) => {
-        const invoiceId = event.relatedTarget.dataset.invoice || "";
-        document.getElementById("sendWorkInvoiceId").value = invoiceId;
-        document.getElementById("sendWorkInvoiceLabel").textContent = invoiceId;
-    });
-
-    sendModal.addEventListener("hidden.bs.modal", () => {
-        sendModal.querySelector("form").reset();
-    });
+            var invoiceId = trigger.dataset.invoice || "";
+            var invoiceInput = document.getElementById("sendWorkInvoiceId");
+            var invoiceLabel = document.getElementById("sendWorkInvoiceLabel");
+            invoiceInput.value = invoiceId;
+            invoiceLabel.textContent = invoiceId;
+        });
+    }
 });

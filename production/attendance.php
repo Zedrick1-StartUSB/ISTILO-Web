@@ -21,23 +21,15 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
 <body>
     <div class="production-app">
         <aside class="production-sidebar">
-            <a class="brand" href="production.php"><span class="brand-stamp">p.</span><span>made &amp; stitched<small>PRODUCTION DESK</small></span></a>
             <p class="side-label">YOUR WORK</p>
             <nav class="production-nav" aria-label="Production workspace">
-                <a class="nav-item" href="production.php"><span>▤</span> Incoming invoices</a>
+                <a class="nav-item" href="production.php">Job Orders</a>
                 <a class="nav-item active" href="attendance.php" aria-current="page"><span>◷</span> Attendance</a>
                 <form method="POST">
                     <button class="btn btn-danger" name="logout" type="submit">Logout</button>
                 </form>
             </nav>
-            <div class="sidebar-note">
-                <span>✿</span>
-                <p><strong>One stitch at a time.</strong><br>You're making good things happen.</p>
-            </div>
-            <div class="maker-profile">
-                <span class="maker-avatar"><?= htmlspecialchars(strtoupper(substr((string) ($_SESSION["fullname"] ?? "P"), 0, 1))) ?></span>
-                <span><strong><?= htmlspecialchars($_SESSION["fullname"] ?? "Production team") ?></strong><small>Production maker</small></span>
-            </div>
+
         </aside>
 
         <main class="production-main">

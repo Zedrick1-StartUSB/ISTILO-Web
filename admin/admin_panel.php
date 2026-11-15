@@ -1,12 +1,13 @@
 <?php
 session_start();
-require "admin_backend.php";
 require "../logout.php";
 
-if($_SESSION["role"] != "admin"){
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
     header("Location: /ISTILO_SYSTEM/Login/html/login.php");
     exit();
 }
+
+require "admin_backend.php";
 ?>
 
 <!DOCTYPE html>
@@ -38,6 +39,11 @@ if($_SESSION["role"] != "admin"){
                     <p class="heading-copy">Create a new job order invoice or check one you made earlier.</p>
                 </div>
             </header>
+            <?php if ($invoice_action_error !== ""): ?>
+                <p class="invoice-message invoice-message-error" role="alert"><?= htmlspecialchars($invoice_action_error, ENT_QUOTES, "UTF-8") ?></p>
+            <?php elseif ($invoice_action_success !== ""): ?>
+                <p class="invoice-message invoice-message-success" role="status"><?= htmlspecialchars($invoice_action_success, ENT_QUOTES, "UTF-8") ?></p>
+            <?php endif; ?>
             <div class="view-switch" role="tablist" aria-label="Invoice pages">
                 <input class="view-radio" type="radio" name="invoice-view" id="view-create" checked>
                 <input class="view-radio" type="radio" name="invoice-view" id="view-logs">
@@ -74,16 +80,16 @@ if($_SESSION["role"] != "admin"){
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="customer-name" class="form-label">Customer name</label>
-                                        <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="Enter customer name" >
+                                        <input type="text" class="form-control" id="customer-name" name="customer_name" placeholder="Enter customer name" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="customer-number" class="form-label">Contact number</label>
-                                        <input type="tel" class="form-control" id="customer-number" name="customer_number" placeholder="09XX XXX XXXX">
+                                        <input type="tel" class="form-control" id="customer-number" name="customer_number" placeholder="09XX XXX XXXX" required>
                                     </div>
                                     <div class="col-md-7">
                                         <label for="shipping-address" class="form-label">Address</label>
                                         <input type="text" class="form-control" id="shipping-address" name="shipping_address"
-                                            placeholder="House number, street, barangay">
+                                            placeholder="House number, street, barangay" required>
                                     </div>
                                     <div class="col-md-5">
                                         <label for="landmarks" class="form-label">Nearby landmark <span class="optional">(optional)</span></label>
@@ -103,20 +109,19 @@ if($_SESSION["role"] != "admin"){
                                 <div class="row g-3">
                                     <div class="col-md-8">
                                         <label for="product-name" class="form-label">Service/s Offered | Accepted </label>
-                                        <input type="text" class="form-control" id="product-name" name="product-service" placeholder="What are we making?">
+                                        <input type="text" class="form-control" id="product-name" name="product-service" placeholder="What are we making?" required>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="quantity" class="form-label">Quantity</label>
-                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" placeholder="Enter quantity" >
+                                        <input type="number" class="form-control" id="quantity" name="quantity" min="1" step="1" placeholder="Enter quantity" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="unit-price" class="form-label">Total Amount(₱)</label>
-                                        <input type="text" class="form-control" id="total-price" name="total-price" placeholder="Agreed Price (Peso)"
-                                            >
+                                        <input type="number" class="form-control" id="total-price" name="total-price" min="0" step="0.01" placeholder="Agreed Price (Peso)" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="due-date" class="form-label">Target completion date</label>
-                                        <input type="date" class="form-control" id="due-date" name="due_date">
+                                        <input type="date" class="form-control" id="due-date" name="due_date" required>
                                     </div>
                                     <div class="col-12">
                                         <label for="job-notes" class="form-label">Job order notes <span class="optional">(optional)</span></label>
@@ -136,8 +141,8 @@ if($_SESSION["role"] != "admin"){
                                 </div>
                                 <label for="reference-image" class="upload-area">
                                     <span class="upload-icon">↑</span>
-                                    <span><strong>Choose an image to upload</strong><small>PNG, JPG, or JPEG</small></span>
-                                    <input type="file" id="reference-image" name="reference_image" accept="image/png,image/jpeg" data-max-size="5242880">
+                                    <span><strong>Choose an image to upload</strong><small>PNG, JPG, or JPEG · Maximum 10 MB</small></span>
+                                    <input type="file" id="reference-image" name="reference_image" accept="image/png,image/jpeg" data-max-size="10485760">
                                 </label>
                                 <div class="reference-preview" id="reference-image-preview" aria-live="polite"></div>
                             </section>
@@ -156,7 +161,7 @@ if($_SESSION["role"] != "admin"){
                                 <h2>Invoice logs</h2>
                                 <p>Recent job order invoices created by the admin.</p>
                             </div>
-                            <span class="record-count">4 records</span>
+                            <span class="record-count"><?= $select_invoice_sql !== false ? (int) $select_invoice_sql->num_rows : 0 ?> records</span>
                         </div>
 
                         <div class="log-filters">
@@ -183,25 +188,36 @@ if($_SESSION["role"] != "admin"){
                                     </tr>
                                 </thead>
                                 <tbody>
-									<?php while($row = $select_invoice_sql->fetch_assoc()): ?>
+                                    <?php if ($invoice_load_error !== ""): ?>
+                                        <tr><td colspan="5"><?= htmlspecialchars($invoice_load_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                    <?php elseif ($select_invoice_sql->num_rows > 0): ?>
+                                    <?php $sendFormIndex = 0; ?>
+									<?php while ($row = $select_invoice_sql->fetch_assoc()): ?>
+                                        <?php
+                                        $invoiceId = (string) ($row["invoice_id"] ?? "");
+                                        $sendFormId = "send-invoice-" . (++$sendFormIndex);
+                                        ?>
                                         <tr>
-                                            <td> <?= htmlspecialchars($row["invoice_id"]) ?> </td>
-                                            <td> <?= htmlspecialchars($row["customer_name"]) ?> </td>
-                                            <td> <?= htmlspecialchars($row["price"]) ?> </td>
+                                            <td><?= htmlspecialchars($invoiceId, ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) $row["customer_name"], ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) $row["price"], ENT_QUOTES, "UTF-8") ?></td>
                                             <td>
-                                                <select name="department" class="form-select form-select-sm">
-                                                    <option value="" selected disabled>Select Department</option>
-                                                    <option value="">Layout Artists</option>
-                                                    <option value="">Production</option>
-                                                    <option value="">Quality Inspection</option>
-                                                </select>
+                                                <form id="<?= $sendFormId ?>" action="" method="POST">
+                                                    <input type="hidden" name="send-to" value="<?= htmlspecialchars($invoiceId, ENT_QUOTES, "UTF-8") ?>">
+                                                    <select name="department" class="form-select form-select-sm" required>
+                                                        <option value="" selected disabled>Select department</option>
+                                                        <option value="layout">Layout</option>
+                                                        <option value="production">Production</option>
+                                                        <option value="qa">QA</option>
+                                                    </select>
+                                                </form>
                                             </td>
-                                            <td>
-                                                <button class="btn btn-success">Send</button>
-                                            </td>
+                                            <td><button class="btn btn-success" type="submit" form="<?= $sendFormId ?>">Send</button></td>
                                         </tr>
-
 									<?php  endwhile; ?>
+                                    <?php else: ?>
+                                        <tr><td colspan="5">No invoices have been created yet.</td></tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>

@@ -1,0 +1,173 @@
+<?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "qa") {
+    http_response_code(403);
+    exit("Forbidden");
+}
+
+require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "dbconn.php";
+
+$qa_incoming_rows = [];
+$qa_working_rows = [];
+$qa_incoming_error = "";
+$qa_working_error = "";
+$qa_action_error = "";
+$qa_action_success = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accept"])) {
+    $invoiceId = is_string($_POST["accept"]) ? trim($_POST["accept"]) : "";
+
+    if ($invoiceId === "") {
+        $qa_action_error = "The incoming invoice could not be identified.";
+    } else {
+        $transactionStarted = false;
+        try {
+            if (!$conn->begin_transaction()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = true;
+
+            $lockIncoming = $conn->prepare(
+                "SELECT 1 FROM `qa_incoming` WHERE `invoice_id` = ? FOR UPDATE"
+            );
+            if ($lockIncoming === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $lockIncoming->bind_param("s", $invoiceId);
+            if (!$lockIncoming->execute()) {
+                throw new mysqli_sql_exception($lockIncoming->error);
+            }
+            $lockIncoming->store_result();
+            if ($lockIncoming->num_rows !== 1) {
+                $lockIncoming->close();
+                throw new mysqli_sql_exception("The incoming invoice is no longer available.");
+            }
+            $lockIncoming->close();
+
+            $copyToQaWork = $conn->prepare(
+                "INSERT INTO `qa_work` (`invoice_id`) "
+                . "SELECT `invoice_id` FROM `qa_incoming` WHERE `invoice_id` = ?"
+            );
+            if ($copyToQaWork === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $copyToQaWork->bind_param("s", $invoiceId);
+            if (!$copyToQaWork->execute()) {
+                throw new mysqli_sql_exception($copyToQaWork->error);
+            }
+            if ($copyToQaWork->affected_rows !== 1) {
+                $copyToQaWork->close();
+                throw new mysqli_sql_exception("The invoice could not be moved to QA Work.");
+            }
+            $copyToQaWork->close();
+
+            $removeIncoming = $conn->prepare(
+                "DELETE FROM `qa_incoming` WHERE `invoice_id` = ?"
+            );
+            if ($removeIncoming === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $removeIncoming->bind_param("s", $invoiceId);
+            if (!$removeIncoming->execute()) {
+                throw new mysqli_sql_exception($removeIncoming->error);
+            }
+            if ($removeIncoming->affected_rows !== 1) {
+                $removeIncoming->close();
+                throw new mysqli_sql_exception("The incoming invoice could not be removed.");
+            }
+            $removeIncoming->close();
+
+            if (!$conn->commit()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = false;
+            $qa_action_success = "Invoice accepted and moved to QA Work.";
+        } catch (mysqli_sql_exception $exception) {
+            if ($transactionStarted) {
+                try {
+                    $conn->rollback();
+                } catch (mysqli_sql_exception $rollbackException) {
+                    error_log("Unable to roll back QA work transfer: " . $rollbackException->getMessage());
+                }
+            }
+            error_log("Unable to accept QA invoice: " . $exception->getMessage());
+            $qa_action_error = "Invoice was not accepted: " . $exception->getMessage();
+        }
+    }
+}
+
+$invoiceIdColumn = "";
+try {
+    $invoiceColumns = $conn->query("SHOW COLUMNS FROM `invoices`");
+    if ($invoiceColumns === false) {
+        throw new mysqli_sql_exception($conn->error);
+    }
+
+    $primaryKeyColumn = "";
+    while ($column = $invoiceColumns->fetch_assoc()) {
+        $columnName = (string) $column["Field"];
+        if ($columnName === "invoice_id") {
+            $invoiceIdColumn = $columnName;
+            break;
+        }
+        if ($columnName === "id") {
+            $primaryKeyColumn = $columnName;
+        } elseif ($primaryKeyColumn === "" && $column["Key"] === "PRI") {
+            $primaryKeyColumn = $columnName;
+        }
+    }
+
+    if ($invoiceIdColumn === "") {
+        $invoiceIdColumn = $primaryKeyColumn;
+    }
+    if ($invoiceIdColumn === "" || !preg_match('/\A[A-Za-z0-9_]+\z/', $invoiceIdColumn)) {
+        throw new mysqli_sql_exception("No valid invoice identifier column was found.");
+    }
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to inspect invoices table for QA: " . $exception->getMessage());
+    $qa_incoming_error = "Incoming invoices could not be loaded.";
+    $qa_working_error = "QA work could not be loaded.";
+}
+
+if ($invoiceIdColumn !== "") {
+    try {
+        $incomingInvoices = "
+            SELECT qi.`invoice_id`, i.`customer_name`, i.`services`, i.`quantity`
+            FROM `qa_incoming` qi
+            LEFT JOIN `invoices` i ON i.`" . $invoiceIdColumn . "` = qi.`invoice_id`
+            ORDER BY qi.`invoice_id` DESC
+        ";
+        $queryIncomingInvoices = $conn->query($incomingInvoices);
+        if ($queryIncomingInvoices === false) {
+            throw new mysqli_sql_exception($conn->error);
+        }
+        while ($row = $queryIncomingInvoices->fetch_assoc()) {
+            $qa_incoming_rows[] = $row;
+        }
+    } catch (mysqli_sql_exception $exception) {
+        error_log("Unable to load incoming QA invoices: " . $exception->getMessage());
+        $qa_incoming_error = "Incoming invoices could not be loaded.";
+    }
+
+    try {
+        $workingInvoices = "
+            SELECT qw.`invoice_id`, i.`customer_name`, i.`services`, i.`quantity`
+            FROM `qa_work` qw
+            LEFT JOIN `invoices` i ON i.`" . $invoiceIdColumn . "` = qw.`invoice_id`
+            ORDER BY qw.`invoice_id` DESC
+        ";
+        $queryWorkingInvoices = $conn->query($workingInvoices);
+        if ($queryWorkingInvoices === false) {
+            throw new mysqli_sql_exception($conn->error);
+        }
+        while ($row = $queryWorkingInvoices->fetch_assoc()) {
+            $qa_working_rows[] = $row;
+        }
+    } catch (mysqli_sql_exception $exception) {
+        error_log("Unable to load QA Work invoices: " . $exception->getMessage());
+        $qa_working_error = "QA work could not be loaded.";
+    }
+}

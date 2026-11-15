@@ -54,6 +54,11 @@ require "layout_backend.php";
                     </div>
                     <span class="artist-status"><span></span> Studio is open</span>
                 </header>
+                <?php if ($layout_action_error !== ""): ?>
+                    <p class="invoice-message invoice-message-error" role="alert"><?= htmlspecialchars($layout_action_error, ENT_QUOTES, "UTF-8") ?></p>
+                <?php elseif ($layout_action_success !== ""): ?>
+                    <p class="invoice-message invoice-message-success" role="status"><?= htmlspecialchars($layout_action_success, ENT_QUOTES, "UTF-8") ?></p>
+                <?php endif; ?>
 
                 <section class="panel dashboard-panel invoice-panel">
                     <div class="section-heading">
@@ -76,17 +81,19 @@ require "layout_backend.php";
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($query_incoming_invoices->num_rows > 0): ?>
-                                    <?php while ($row = $query_incoming_invoices->fetch_assoc()): ?>
+                                <?php if ($layout_incoming_error !== ""): ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($layout_incoming_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($layout_incoming_rows) > 0): ?>
+                                    <?php foreach ($layout_incoming_rows as $row): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($row["invoice_id"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["customer_name"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["services"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["quantity"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["price"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["completion_date"] ?? '') ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["price"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
                                         </tr>
-                                    <?php endwhile; ?>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="6">No incoming invoices found.</td>
@@ -120,24 +127,22 @@ require "layout_backend.php";
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($query_working_invoices !== false && $query_working_invoices->num_rows > 0): ?>
-                                    <?php while ($row = $query_working_invoices->fetch_assoc()): ?>
+                                <?php if ($layout_working_error !== ""): ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($layout_working_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                <?php elseif (count($layout_working_rows) > 0): ?>
+                                    <?php foreach ($layout_working_rows as $row): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($row["invoice_id"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["customer_name"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["services"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["quantity"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["price"] ?? '') ?></td>
-                                            <td><?= htmlspecialchars($row["completion_date"] ?? '') ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["price"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                            <td><?= htmlspecialchars((string) ($row["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
                                         </tr>
-                                    <?php endwhile; ?>
-                                <?php elseif ($query_working_invoices !== false): ?>
-                                    <tr>
-                                        <td colspan="6">No working invoices found.</td>
-                                    </tr>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6">Working invoices could not be loaded.</td>
+                                        <td colspan="6">No working invoices found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
