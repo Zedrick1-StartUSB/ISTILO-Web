@@ -8,6 +8,16 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "qa") {
 }
 
 require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
+
+$profileName = trim((string) ($_SESSION["fullname"] ?? ""));
+if ($profileName === "") {
+    $profileName = trim((string) ($_SESSION["username"] ?? "QA Account"));
+}
+$profileUsername = trim((string) ($_SESSION["username"] ?? ""));
+$profileInitials = strtoupper(substr($profileName, 0, 1));
+if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
+    $profileInitials .= strtoupper($profileMatches[1]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -16,20 +26,28 @@ require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f6f5ef">
-    <title>Quality Assurance Desk</title>
+    <title>Quality Assurance | ISTILO @ Nasugbu Enterprises</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../production/production.css">
+    <link rel="stylesheet" href="../production/production.css?v=2">
 </head>
 <body>
     <div class="production-app">
         <aside class="production-sidebar">
-            <p class="side-label">YOUR WORK</p>
+            <a class="brand" href="quality_inspection.php">
+                <span class="brand-stamp">I</span>
+                <span>ISTILO<small>@ NASUGBU ENTERPRISES</small></span>
+            </a>
+            <p class="side-label">WORKSPACE</p>
             <nav class="production-nav" aria-label="Quality assurance workspace">
                 <a class="nav-item active" href="#incoming" aria-current="page">Job Orders</a>
-                <form method="POST">
-                    <button class="btn btn-danger" name="logout" type="submit">Logout</button>
-                </form>
             </nav>
+            <form class="production-logout" method="POST">
+                <button class="btn btn-danger" name="logout" type="submit">Logout</button>
+            </form>
+            <div class="maker-profile">
+                <span class="maker-avatar"><?= htmlspecialchars($profileInitials, ENT_QUOTES, "UTF-8") ?></span>
+                <span><strong><?= htmlspecialchars($profileName, ENT_QUOTES, "UTF-8") ?></strong><small><?= $profileUsername !== "" ? "@" . htmlspecialchars($profileUsername, ENT_QUOTES, "UTF-8") . " · " : "" ?>QA account</small></span>
+            </div>
         </aside>
 
         <main class="production-main">

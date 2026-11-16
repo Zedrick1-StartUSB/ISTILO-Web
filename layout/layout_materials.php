@@ -9,6 +9,16 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "layout") {
 }
 
 require "layout_materials_backend.php";
+
+$profileName = trim((string) ($_SESSION["fullname"] ?? ""));
+if ($profileName === "") {
+    $profileName = trim((string) ($_SESSION["username"] ?? "Layout Account"));
+}
+$profileUsername = trim((string) ($_SESSION["username"] ?? ""));
+$profileInitials = strtoupper(substr($profileName, 0, 1));
+if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
+    $profileInitials .= strtoupper($profileMatches[1]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,31 +27,32 @@ require "layout_materials_backend.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f8f5ef">
-    <title>Materials | Thread &amp; Form</title>
+    <title>Materials | ISTILO @ Nasugbu Enterprises</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
-    <link rel="stylesheet" href="layout_artist.css">
+    <link rel="stylesheet" href="layout_artist.css?v=2">
     <link rel="stylesheet" href="layout_materials.css">
 </head>
 <body>
     <div class="studio-shell">
         <aside class="studio-sidebar">
             <a class="studio-brand" href="layout_work.php">
-                <span class="brand-mark">t.</span>
-                <span>thread &amp; form<small>LAYOUT STUDIO</small></span>
+                <span class="brand-mark">I</span>
+                <span>ISTILO<small>@ NASUGBU ENTERPRISES</small></span>
             </a>
 
             <p class="menu-label">WORKSPACE</p>
             <nav class="studio-nav" aria-label="Layout workspace">
                 <a class="studio-nav-link" href="layout_work.php"><span aria-hidden="true">⌂</span> Dashboard</a>
                 <a class="studio-nav-link selected" href="layout_materials.php" aria-current="page"><span aria-hidden="true">◇</span> Materials</a>
-                <form method="POST">
-                    <button class="btn btn-danger btn-sm w-100" name="logout" type="submit">Logout</button>
-                </form>
             </nav>
 
+            <form class="studio-logout" method="POST">
+                <button class="btn btn-danger btn-sm w-100" name="logout" type="submit">Logout</button>
+            </form>
+
             <div class="artist-profile">
-                <span class="artist-avatar">LA</span>
-                <span><strong>Layout Artist</strong><small>Layout studio</small></span>
+                <span class="artist-avatar"><?= htmlspecialchars($profileInitials, ENT_QUOTES, "UTF-8") ?></span>
+                <span><strong><?= htmlspecialchars($profileName, ENT_QUOTES, "UTF-8") ?></strong><small><?= $profileUsername !== "" ? "@" . htmlspecialchars($profileUsername, ENT_QUOTES, "UTF-8") . " · " : "" ?>Layout account</small></span>
             </div>
         </aside>
 

@@ -9,6 +9,15 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
 
 require "production_backend.php";
 
+$profileName = trim((string) ($_SESSION["fullname"] ?? ""));
+if ($profileName === "") {
+    $profileName = trim((string) ($_SESSION["username"] ?? "Production Account"));
+}
+$profileUsername = trim((string) ($_SESSION["username"] ?? ""));
+$profileInitials = strtoupper(substr($profileName, 0, 1));
+if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
+    $profileInitials .= strtoupper($profileMatches[1]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -19,21 +28,27 @@ require "production_backend.php";
     <meta name="theme-color" content="#f6f5ef">
     <title>Production Desk</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
-    <link rel="stylesheet" href="production.css">
+    <link rel="stylesheet" href="production.css?v=2">
 </head>
 <body>
     <div class="production-app">
         <aside class="production-sidebar">
-
-            <p class="side-label">YOUR WORK</p>
+            <a class="brand" href="production.php">
+                <span class="brand-stamp">I</span>
+                <span>ISTILO<small>@ NASUGBU ENTERPRISES</small></span>
+            </a>
+            <p class="side-label">WORKSPACE</p>
             <nav class="production-nav" aria-label="Production workspace">
                 <a class="nav-item active" href="#incoming" aria-current="page">Job Orders</a>
                 <a class="nav-item" href="attendance.php"><span>◷</span> Attendance</a>
-                <form method="POST">
-                    <button class="btn btn-danger" name="logout">Logout</button>
-                </form>
             </nav>
-
+            <form class="production-logout" method="POST">
+                <button class="btn btn-danger" name="logout" type="submit">Logout</button>
+            </form>
+            <div class="maker-profile">
+                <span class="maker-avatar"><?= htmlspecialchars($profileInitials, ENT_QUOTES, "UTF-8") ?></span>
+                <span><strong><?= htmlspecialchars($profileName, ENT_QUOTES, "UTF-8") ?></strong><small><?= $profileUsername !== "" ? "@" . htmlspecialchars($profileUsername, ENT_QUOTES, "UTF-8") . " · " : "" ?>Production account</small></span>
+            </div>
         </aside>
 
         <main class="production-main">

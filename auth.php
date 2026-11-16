@@ -75,34 +75,93 @@ if(isset($_POST["login"])){
     }
 }
 
-// SignUp
+// Sign up
+$signup_error = "";
+$signup_fullname = "";
+$signup_username = "";
+$signup_department = "";
+$signup_role = "";
 
-if(isset($_POST["signup"])){
-    $fullname = $_POST["fullname"];
-    $username = $_POST["username"];
-    $password = strtolower($_POST["password"]);
-    $confirm_password = $_POST["confirm-password"];
+if (isset($_POST["signup"])) {
+    $signup_fullname = is_string($_POST["fullname"] ?? null) ? trim($_POST["fullname"]) : "";
+    $signup_username = is_string($_POST["username"] ?? null) ? trim($_POST["username"]) : "";
+    $password = is_string($_POST["password"] ?? null) ? $_POST["password"] : "";
+    $confirmPassword = is_string($_POST["confirm-password"] ?? null) ? $_POST["confirm-password"] : "";
+    $signup_department = is_string($_POST["department"] ?? null)
+        ? strtolower(trim($_POST["department"]))
+        : "";
+    $signup_role = is_string($_POST["role"] ?? null)
+        ? strtolower(trim($_POST["role"]))
+        : "";
 
-    if($password == $confirm_password){
+    $departmentRoles = [
+        "layout" => "layout",
+        "production" => "production",
+        "qa" => "qa",
+    ];
 
-        // hashing password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    if ($signup_fullname === "" || $signup_username === "" || $password === "" || $confirmPassword === "") {
+        $signup_error = "Complete all required fields.";
+    } elseif (strlen($signup_fullname) > 255 || strlen($signup_username) > 255) {
+        $signup_error = "Full name and username must be 255 characters or fewer.";
+    } elseif (!isset($departmentRoles[$signup_department])) {
+        $signup_error = "Admin accounts require an invitation. Choose Layout, Production, or QA.";
+    } elseif ($signup_role !== $departmentRoles[$signup_department]) {
+        $signup_error = "Role must match the selected department: " . $departmentRoles[$signup_department] . ".";
+    } elseif ($password !== $confirmPassword) {
+        $signup_error = "Password and confirmation do not match.";
+    } else {
+        try {
+            $findUser = $conn->prepare("SELECT `id` FROM `users` WHERE `username` = ? LIMIT 1");
+            if ($findUser === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $findUser->bind_param("s", $signup_username);
+            if (!$findUser->execute()) {
+                throw new mysqli_sql_exception($findUser->error);
+            }
+            $findUser->store_result();
+            $usernameExists = $findUser->num_rows > 0;
+            $findUser->close();
 
-        //storing to database
+            if ($usernameExists) {
+                $signup_error = "That username is already in use.";
+            } else {
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                if ($hashedPassword === false) {
+                    throw new RuntimeException("Password hashing failed.");
+                }
 
-        $sql_insert = "INSERT INTO users(fullname, username, encrypted_password) VALUES(?,?,?)";
-        $sql_bind = $conn->prepare($sql_insert);
+                $insertUser = $conn->prepare(
+                    "INSERT INTO `users` (`fullname`, `username`, `department`, `role`, `encrypted_password`) "
+                    . "VALUES (?, ?, ?, ?, ?)"
+                );
+                if ($insertUser === false) {
+                    throw new mysqli_sql_exception($conn->error);
+                }
+                $insertUser->bind_param(
+                    "sssss",
+                    $signup_fullname,
+                    $signup_username,
+                    $signup_department,
+                    $signup_role,
+                    $hashedPassword
+                );
+                if (!$insertUser->execute()) {
+                    throw new mysqli_sql_exception($insertUser->error);
+                }
+                $insertUser->close();
 
-        if($sql_bind){
-
-            $sql_bind->bind_param("sss", $fullname, $username, $hashed_password);
-            $sql_bind->execute();
+                header("Location: /ISTILO_SYSTEM/Login/html/login.php");
+                exit();
+            }
+        } catch (mysqli_sql_exception $exception) {
+            error_log("Unable to create user account: " . $exception->getMessage());
+            $signup_error = "The account could not be created. Check the users table and try again.";
+        } catch (RuntimeException $exception) {
+            error_log("Unable to create user account: " . $exception->getMessage());
+            $signup_error = "The account could not be created. Try again.";
         }
-        header("Location: login.php");
-        exit();
-    }else{
-        echo "Password does not match";
     }
-
 }
 ?>
