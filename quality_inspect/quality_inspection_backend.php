@@ -10,6 +10,32 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "qa") {
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "dbconn.php";
 
+function getQaInvoiceIdColumn(mysqli $conn): string
+{
+    $columns = $conn->query("SHOW COLUMNS FROM `invoices`");
+    if ($columns === false) {
+        throw new mysqli_sql_exception($conn->error);
+    }
+
+    $primaryKeyColumn = "";
+    while ($column = $columns->fetch_assoc()) {
+        $columnName = (string) $column["Field"];
+        if ($columnName === "invoice_id") {
+            return $columnName;
+        }
+        if ($columnName === "id") {
+            $primaryKeyColumn = $columnName;
+        } elseif ($primaryKeyColumn === "" && $column["Key"] === "PRI") {
+            $primaryKeyColumn = $columnName;
+        }
+    }
+
+    if ($primaryKeyColumn === "" || !preg_match('/\A[A-Za-z0-9_]+\z/', $primaryKeyColumn)) {
+        throw new mysqli_sql_exception("No valid invoice identifier column was found.");
+    }
+    return $primaryKeyColumn;
+}
+
 $qa_incoming_rows = [];
 $qa_working_rows = [];
 $qa_incoming_error = "";
@@ -95,6 +121,119 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["accept"])) {
             }
             error_log("Unable to accept QA invoice: " . $exception->getMessage());
             $qa_action_error = "Invoice was not accepted: " . $exception->getMessage();
+        }
+    }
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["complete"])) {
+    $invoiceId = is_string($_POST["complete"]) ? trim($_POST["complete"]) : "";
+
+    if ($invoiceId === "") {
+        $qa_action_error = "The QA invoice could not be identified.";
+    } else {
+        $transactionStarted = false;
+        try {
+            if (!$conn->begin_transaction()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = true;
+
+            $lockQaWork = $conn->prepare(
+                "SELECT 1 FROM `qa_work` WHERE `invoice_id` = ? FOR UPDATE"
+            );
+            if ($lockQaWork === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $lockQaWork->bind_param("s", $invoiceId);
+            if (!$lockQaWork->execute()) {
+                throw new mysqli_sql_exception($lockQaWork->error);
+            }
+            $lockQaWork->store_result();
+            if ($lockQaWork->num_rows !== 1) {
+                $lockQaWork->close();
+                throw new mysqli_sql_exception("The QA invoice is no longer available.");
+            }
+            $lockQaWork->close();
+
+            $copyToShipping = $conn->prepare(
+                "INSERT INTO `completed_for_shipping` (`invoice_id`) "
+                . "SELECT `invoice_id` FROM `qa_work` WHERE `invoice_id` = ?"
+            );
+            if ($copyToShipping === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $copyToShipping->bind_param("s", $invoiceId);
+            if (!$copyToShipping->execute()) {
+                throw new mysqli_sql_exception($copyToShipping->error);
+            }
+            if ($copyToShipping->affected_rows !== 1) {
+                $copyToShipping->close();
+                throw new mysqli_sql_exception("The invoice could not be sent for shipping.");
+            }
+            $copyToShipping->close();
+
+            $statusIdColumn = getQaInvoiceIdColumn($conn);
+            $markQaPassed = $conn->prepare(
+                "UPDATE `invoices` SET `pass_qa` = 'PASS' WHERE `" . $statusIdColumn . "` = ?"
+            );
+            if ($markQaPassed === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $markQaPassed->bind_param("s", $invoiceId);
+            if (!$markQaPassed->execute()) {
+                throw new mysqli_sql_exception($markQaPassed->error);
+            }
+            $markQaPassed->close();
+
+            $verifyQaPassed = $conn->prepare(
+                "SELECT 1 FROM `invoices` "
+                . "WHERE `" . $statusIdColumn . "` = ? AND `pass_qa` = 'PASS' FOR UPDATE"
+            );
+            if ($verifyQaPassed === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $verifyQaPassed->bind_param("s", $invoiceId);
+            if (!$verifyQaPassed->execute()) {
+                throw new mysqli_sql_exception($verifyQaPassed->error);
+            }
+            $verifyQaPassed->store_result();
+            if ($verifyQaPassed->num_rows !== 1) {
+                $verifyQaPassed->close();
+                throw new mysqli_sql_exception("The invoice QA status could not be updated.");
+            }
+            $verifyQaPassed->close();
+
+            $removeQaWork = $conn->prepare(
+                "DELETE FROM `qa_work` WHERE `invoice_id` = ?"
+            );
+            if ($removeQaWork === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $removeQaWork->bind_param("s", $invoiceId);
+            if (!$removeQaWork->execute()) {
+                throw new mysqli_sql_exception($removeQaWork->error);
+            }
+            if ($removeQaWork->affected_rows !== 1) {
+                $removeQaWork->close();
+                throw new mysqli_sql_exception("The completed invoice could not be removed from QA Work.");
+            }
+            $removeQaWork->close();
+
+            if (!$conn->commit()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = false;
+            $qa_action_success = "Invoice completed and sent for shipping.";
+        } catch (mysqli_sql_exception $exception) {
+            if ($transactionStarted) {
+                try {
+                    $conn->rollback();
+                } catch (mysqli_sql_exception $rollbackException) {
+                    error_log("Unable to roll back QA completion: " . $rollbackException->getMessage());
+                }
+            }
+            error_log("Unable to complete QA invoice: " . $exception->getMessage());
+            $qa_action_error = "Invoice was not completed: " . $exception->getMessage();
         }
     }
 }

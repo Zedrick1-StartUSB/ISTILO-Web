@@ -17,22 +17,22 @@ require "layout_backend.php";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f8f5ef">
-    <title>Work | Thread &amp; Form</title>
+    <title>Dashboard | Thread &amp; Form</title>
     <link rel="stylesheet" href="../bootstrap_template/css/bootstrap.min.css">
     <link rel="stylesheet" href="layout_artist.css">
 </head>
 <body>
     <div class="studio-shell work-page-shell">
         <aside class="studio-sidebar">
-            <a class="studio-brand" href="layout_artist.php">
+            <a class="studio-brand" href="layout_work.php">
                 <span class="brand-mark">t.</span>
                 <span>thread &amp; form<small>LAYOUT STUDIO</small></span>
             </a>
 
             <p class="menu-label">WORKSPACE</p>
             <nav class="studio-nav" aria-label="Layout workspace">
-                <a class="studio-nav-link" href="layout_artist.php"><span aria-hidden="true">⌂</span> Dashboard</a>
-                <a class="studio-nav-link selected" href="layout_work.php" aria-current="page"><span aria-hidden="true">✓</span> Work</a>
+                <a class="studio-nav-link selected" href="layout_work.php" aria-current="page"><span aria-hidden="true">⌂</span> Dashboard</a>
+                <a class="studio-nav-link" href="layout_materials.php"><span aria-hidden="true">◇</span> Materials</a>
                 <form method="POST">
                     <button class="btn btn-danger btn-sm w-100" name="logout" type="submit">Logout</button>
                 </form>
@@ -49,7 +49,7 @@ require "layout_backend.php";
                 <header class="studio-header">
                     <div>
                         <p class="date-label">LAYOUT STUDIO · JOB ORDERS</p>
-                        <h1 id="work-title">Work</h1>
+                        <h1 id="work-title">Dashboard</h1>
                         <p class="header-subtitle">Review new work and manage your jobs in progress.</p>
                     </div>
                 </header>

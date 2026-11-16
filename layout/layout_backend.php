@@ -10,6 +10,32 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "layout") {
 
 require_once "../dbconn.php";
 
+function getLayoutInvoiceIdColumn(mysqli $conn): string
+{
+    $columns = $conn->query("SHOW COLUMNS FROM `invoices`");
+    if ($columns === false) {
+        throw new mysqli_sql_exception($conn->error);
+    }
+
+    $primaryKeyColumn = "";
+    while ($column = $columns->fetch_assoc()) {
+        $columnName = (string) $column["Field"];
+        if ($columnName === "invoice_id") {
+            return $columnName;
+        }
+        if ($columnName === "id") {
+            $primaryKeyColumn = $columnName;
+        } elseif ($primaryKeyColumn === "" && $column["Key"] === "PRI") {
+            $primaryKeyColumn = $columnName;
+        }
+    }
+
+    if ($primaryKeyColumn === "" || !preg_match('/\A[A-Za-z0-9_]+\z/', $primaryKeyColumn)) {
+        throw new mysqli_sql_exception("No valid invoice identifier column was found.");
+    }
+    return $primaryKeyColumn;
+}
+
 $layout_incoming_rows = [];
 $layout_working_rows = [];
 $layout_incoming_error = "";
@@ -86,6 +112,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_work"])) {
                             throw new mysqli_sql_exception($sendToProduction->error);
                         }
                         $sendToProduction->close();
+
+                        $statusIdColumn = getLayoutInvoiceIdColumn($conn);
+                        $markLayoutPassed = $conn->prepare(
+                            "UPDATE `invoices` SET `pass_layout` = 'PASS' WHERE `" . $statusIdColumn . "` = ?"
+                        );
+                        if ($markLayoutPassed === false) {
+                            throw new mysqli_sql_exception($conn->error);
+                        }
+                        $markLayoutPassed->bind_param("s", $invoiceId);
+                        if (!$markLayoutPassed->execute()) {
+                            throw new mysqli_sql_exception($markLayoutPassed->error);
+                        }
+                        $markLayoutPassed->close();
+
+                        $verifyLayoutPassed = $conn->prepare(
+                            "SELECT 1 FROM `invoices` "
+                            . "WHERE `" . $statusIdColumn . "` = ? AND `pass_layout` = 'PASS' FOR UPDATE"
+                        );
+                        if ($verifyLayoutPassed === false) {
+                            throw new mysqli_sql_exception($conn->error);
+                        }
+                        $verifyLayoutPassed->bind_param("s", $invoiceId);
+                        if (!$verifyLayoutPassed->execute()) {
+                            throw new mysqli_sql_exception($verifyLayoutPassed->error);
+                        }
+                        $verifyLayoutPassed->store_result();
+                        if ($verifyLayoutPassed->num_rows !== 1) {
+                            $verifyLayoutPassed->close();
+                            throw new mysqli_sql_exception("The invoice Layout status could not be updated.");
+                        }
+                        $verifyLayoutPassed->close();
 
                         $removeLayoutWork = $conn->prepare(
                             "DELETE FROM `layout_artist_work` WHERE `invoice_id` = ?"

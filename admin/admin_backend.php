@@ -63,13 +63,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
         try {
             $sourceColumns = getInvoiceTableColumns($conn, "admin_invoices");
             $destinationColumns = getInvoiceTableColumns($conn, "invoices");
-            $sourceFields = [];
             $sourceDefinition = [];
             $destinationDefinition = [];
 
             foreach ($sourceColumns as $column) {
                 $field = (string) $column["Field"];
-                $sourceFields[] = $field;
                 $sourceDefinition[$field] = [$column["Type"], $column["Null"], $column["Default"], $column["Extra"]];
             }
             foreach ($destinationColumns as $column) {
@@ -77,13 +75,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
                 $destinationDefinition[$field] = [$column["Type"], $column["Null"], $column["Default"], $column["Extra"]];
             }
 
-            $sourceComparable = $sourceDefinition;
-            $destinationComparable = $destinationDefinition;
-            ksort($sourceComparable);
-            ksort($destinationComparable);
-
-            if ($sourceComparable !== $destinationComparable) {
-                throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+            $passColumns = ["pass_admin", "pass_layout", "pass_production", "pass_qa"];
+            $transferFields = [];
+            foreach ($sourceDefinition as $field => $definition) {
+                if (in_array($field, $passColumns, true)) {
+                    continue;
+                }
+                if (
+                    !isset($destinationDefinition[$field])
+                    || $destinationDefinition[$field] !== $definition
+                ) {
+                    throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                }
+                $transferFields[] = $field;
+            }
+            foreach ($destinationDefinition as $field => $definition) {
+                if (!in_array($field, $passColumns, true) && !isset($sourceDefinition[$field])) {
+                    throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                }
+            }
+            foreach ($passColumns as $passColumn) {
+                if (!isset($destinationDefinition[$passColumn])) {
+                    throw new mysqli_sql_exception("The `invoices` table is missing the `" . $passColumn . "` column.");
+                }
             }
 
             $identifierColumn = getInvoiceIdentifierColumn($sourceColumns);
@@ -92,13 +106,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
             }
 
             $quotedFields = [];
-            foreach ($sourceFields as $field) {
+            $quotedSourceFields = [];
+            foreach ($transferFields as $field) {
                 if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
                     throw new mysqli_sql_exception("An invoice column name is invalid.");
                 }
                 $quotedFields[] = "`" . $field . "`";
+                $quotedSourceFields[] = "`" . $field . "`";
+            }
+            foreach ($passColumns as $passColumn) {
+                $quotedFields[] = "`" . $passColumn . "`";
             }
             $fieldList = implode(", ", $quotedFields);
+            $sourceFieldList = implode(", ", $quotedSourceFields);
+            $passValues = "'PASS', '', '', ''";
 
             if (!$conn->begin_transaction()) {
                 throw new mysqli_sql_exception($conn->error);
@@ -124,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
 
             $copyInvoice = $conn->prepare(
                 "INSERT INTO `invoices` (" . $fieldList . ") "
-                . "SELECT " . $fieldList . " FROM `admin_invoices` "
+                . "SELECT " . $sourceFieldList . ", " . $passValues . " FROM `admin_invoices` "
                 . "WHERE `" . $identifierColumn . "` = ?"
             );
             if ($copyInvoice === false) {

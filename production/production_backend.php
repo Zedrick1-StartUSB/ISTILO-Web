@@ -10,6 +10,32 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
 
 require_once "../dbconn.php";
 
+function getProductionInvoiceIdColumn(mysqli $conn): string
+{
+    $columns = $conn->query("SHOW COLUMNS FROM `invoices`");
+    if ($columns === false) {
+        throw new mysqli_sql_exception($conn->error);
+    }
+
+    $primaryKeyColumn = "";
+    while ($column = $columns->fetch_assoc()) {
+        $columnName = (string) $column["Field"];
+        if ($columnName === "invoice_id") {
+            return $columnName;
+        }
+        if ($columnName === "id") {
+            $primaryKeyColumn = $columnName;
+        } elseif ($primaryKeyColumn === "" && $column["Key"] === "PRI") {
+            $primaryKeyColumn = $columnName;
+        }
+    }
+
+    if ($primaryKeyColumn === "" || !preg_match('/\A[A-Za-z0-9_]+\z/', $primaryKeyColumn)) {
+        throw new mysqli_sql_exception("No valid invoice identifier column was found.");
+    }
+    return $primaryKeyColumn;
+}
+
 $production_incoming_rows = [];
 $production_working_rows = [];
 $production_incoming_error = "";
@@ -64,12 +90,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
 
                 $invoiceDefinitions = [];
                 $adminDefinitions = [];
-                $invoiceFields = [];
                 $invoiceIdentifierColumn = "";
                 $primaryKeyColumn = "";
                 while ($column = $invoiceColumns->fetch_assoc()) {
                     $field = (string) $column["Field"];
-                    $invoiceFields[] = $field;
                     $invoiceDefinitions[$field] = [
                         $column["Type"],
                         $column["Null"],
@@ -97,12 +121,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
                 if ($invoiceIdentifierColumn === "") {
                     $invoiceIdentifierColumn = $primaryKeyColumn;
                 }
-                $comparableInvoiceDefinitions = $invoiceDefinitions;
-                $comparableAdminDefinitions = $adminDefinitions;
-                ksort($comparableInvoiceDefinitions);
-                ksort($comparableAdminDefinitions);
-                if ($comparableInvoiceDefinitions !== $comparableAdminDefinitions) {
-                    throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                $passColumns = ["pass_admin", "pass_layout", "pass_production", "pass_qa"];
+                $transferFields = [];
+                foreach ($invoiceDefinitions as $field => $definition) {
+                    if (in_array($field, $passColumns, true)) {
+                        continue;
+                    }
+                    if (
+                        !isset($adminDefinitions[$field])
+                        || $adminDefinitions[$field] !== $definition
+                    ) {
+                        throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                    }
+                }
+                foreach ($adminDefinitions as $field => $definition) {
+                    if (in_array($field, $passColumns, true)) {
+                        continue;
+                    }
+                    if (
+                        !isset($invoiceDefinitions[$field])
+                        || $invoiceDefinitions[$field] !== $definition
+                    ) {
+                        throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                    }
+                    $transferFields[] = $field;
                 }
                 if (
                     $invoiceIdentifierColumn === ""
@@ -112,7 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
                 }
 
                 $quotedFields = [];
-                foreach ($invoiceFields as $field) {
+                foreach ($transferFields as $field) {
                     if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
                         throw new mysqli_sql_exception("An invoice column name is invalid.");
                     }
@@ -156,6 +198,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
                 }
                 $sendToDepartment->close();
             }
+
+            $statusIdColumn = getProductionInvoiceIdColumn($conn);
+            $markProductionPassed = $conn->prepare(
+                "UPDATE `invoices` SET `pass_production` = 'PASS' WHERE `" . $statusIdColumn . "` = ?"
+            );
+            if ($markProductionPassed === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $markProductionPassed->bind_param("s", $invoiceId);
+            if (!$markProductionPassed->execute()) {
+                throw new mysqli_sql_exception($markProductionPassed->error);
+            }
+            $markProductionPassed->close();
+
+            $verifyProductionPassed = $conn->prepare(
+                "SELECT 1 FROM `invoices` "
+                . "WHERE `" . $statusIdColumn . "` = ? AND `pass_production` = 'PASS' FOR UPDATE"
+            );
+            if ($verifyProductionPassed === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $verifyProductionPassed->bind_param("s", $invoiceId);
+            if (!$verifyProductionPassed->execute()) {
+                throw new mysqli_sql_exception($verifyProductionPassed->error);
+            }
+            $verifyProductionPassed->store_result();
+            if ($verifyProductionPassed->num_rows !== 1) {
+                $verifyProductionPassed->close();
+                throw new mysqli_sql_exception("The invoice Production status could not be updated.");
+            }
+            $verifyProductionPassed->close();
 
             $removeProductionWork = $conn->prepare(
                 "DELETE FROM `production_work` WHERE `invoice_id` = ?"

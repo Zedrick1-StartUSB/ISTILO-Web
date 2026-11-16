@@ -11,7 +11,7 @@ if(isset($_SESSION["username"]) && isset($_SESSION["role"])){ // Bawal bumalik i
         header("Location: /ISTILO_SYSTEM/admin/admin_panel.php");
         exit();
     }else if($_SESSION["role"] == "layout"){
-        header("Location: /ISTILO_SYSTEM/layout/layout_artist.php");
+        header("Location: /ISTILO_SYSTEM/layout/layout_work.php");
         exit();
     }else if($_SESSION["role"] == "production"){
         header("Location: /ISTILO_SYSTEM/production/production.php");
@@ -55,7 +55,7 @@ if(isset($_POST["login"])){
                     header("Location: /ISTILO_SYSTEM/admin/admin_panel.php");
                     exit();
                 }else if($_SESSION["role"] == "layout"){
-                    header("Location: /ISTILO_SYSTEM/layout/layout_artist.php");
+                    header("Location: /ISTILO_SYSTEM/layout/layout_work.php");
                     exit();
                 }else if($_SESSION["role"] == "production"){
                     header("Location: /ISTILO_SYSTEM/production/production.php");

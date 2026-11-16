@@ -114,7 +114,11 @@ require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
                                             <td><?= htmlspecialchars((string) ($row["customer_name"] ?? "Invoice details unavailable"), ENT_QUOTES, "UTF-8") ?></td>
                                             <td><?= htmlspecialchars((string) ($row["services"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
                                             <td><?= htmlspecialchars((string) ($row["quantity"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
-                                            <td><button class="btn btn-success btn-sm" type="button">Complete</button></td>
+                                            <td>
+                                                <form method="post">
+                                                    <button class="btn btn-success btn-sm" type="submit" name="complete" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Complete</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
