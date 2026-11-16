@@ -45,11 +45,16 @@ $layout_action_success = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_work"])) {
     $invoiceId = trim((string) ($_POST["invoice_id"] ?? ""));
-    $department = (string) ($_POST["department"] ?? "");
+    $department = strtolower(trim((string) ($_POST["department"] ?? "")));
+    $departmentNames = [
+        "admin" => "Admin",
+        "production" => "Production",
+        "quality assurance" => "Quality Assurance",
+    ];
     $upload = $_FILES["work_file"] ?? null;
 
-    if ($department !== "production") {
-        $layout_action_error = "Only Production transfers are configured. The invoice remains in Layout.";
+    if (!isset($departmentNames[$department])) {
+        $layout_action_error = "Choose a valid department. The invoice remains in Layout.";
     } elseif ($invoiceId === "") {
         $layout_action_error = "The invoice could not be identified.";
     } elseif ($upload === null || $upload["error"] !== UPLOAD_ERR_OK || $upload["size"] > 10 * 1024 * 1024) {
@@ -101,19 +106,121 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_work"])) {
                         }
                         $lockWorkingInvoice->close();
 
-                        $sendToProduction = $conn->prepare(
-                            "INSERT INTO `production_incoming` (`invoice_id`, `file`) VALUES (?, ?)"
-                        );
-                        if ($sendToProduction === false) {
-                            throw new mysqli_sql_exception($conn->error);
-                        }
-                        $sendToProduction->bind_param("ss", $invoiceId, $workFileName);
-                        if (!$sendToProduction->execute()) {
-                            throw new mysqli_sql_exception($sendToProduction->error);
-                        }
-                        $sendToProduction->close();
-
                         $statusIdColumn = getLayoutInvoiceIdColumn($conn);
+
+                        if ($department === "production") {
+                            $sendToDepartment = $conn->prepare(
+                                "INSERT INTO `production_incoming` (`invoice_id`, `file`) VALUES (?, ?)"
+                            );
+                            if ($sendToDepartment === false) {
+                                throw new mysqli_sql_exception($conn->error);
+                            }
+                            $sendToDepartment->bind_param("ss", $invoiceId, $workFileName);
+                            if (!$sendToDepartment->execute()) {
+                                throw new mysqli_sql_exception($sendToDepartment->error);
+                            }
+                            if ($sendToDepartment->affected_rows !== 1) {
+                                $sendToDepartment->close();
+                                throw new mysqli_sql_exception("The invoice was not added to Production incoming.");
+                            }
+                            $sendToDepartment->close();
+                        } elseif ($department === "quality assurance") {
+                            $sendToDepartment = $conn->prepare(
+                                "INSERT INTO `qa_incoming` (`invoice_id`) VALUES (?)"
+                            );
+                            if ($sendToDepartment === false) {
+                                throw new mysqli_sql_exception($conn->error);
+                            }
+                            $sendToDepartment->bind_param("s", $invoiceId);
+                            if (!$sendToDepartment->execute()) {
+                                throw new mysqli_sql_exception($sendToDepartment->error);
+                            }
+                            if ($sendToDepartment->affected_rows !== 1) {
+                                $sendToDepartment->close();
+                                throw new mysqli_sql_exception("The invoice was not added to QA incoming.");
+                            }
+                            $sendToDepartment->close();
+                        } else {
+                            $invoiceColumns = $conn->query("SHOW COLUMNS FROM `invoices`");
+                            $adminColumns = $conn->query("SHOW COLUMNS FROM `admin_invoices`");
+                            if ($invoiceColumns === false || $adminColumns === false) {
+                                throw new mysqli_sql_exception($conn->error);
+                            }
+
+                            $invoiceDefinitions = [];
+                            $adminDefinitions = [];
+                            while ($column = $invoiceColumns->fetch_assoc()) {
+                                $field = (string) $column["Field"];
+                                $invoiceDefinitions[$field] = [
+                                    $column["Type"],
+                                    $column["Null"],
+                                    $column["Default"],
+                                    $column["Extra"],
+                                ];
+                            }
+                            while ($column = $adminColumns->fetch_assoc()) {
+                                $field = (string) $column["Field"];
+                                $adminDefinitions[$field] = [
+                                    $column["Type"],
+                                    $column["Null"],
+                                    $column["Default"],
+                                    $column["Extra"],
+                                ];
+                            }
+
+                            $passColumns = ["pass_admin", "pass_layout", "pass_production", "pass_qa"];
+                            $transferFields = [];
+                            foreach ($invoiceDefinitions as $field => $definition) {
+                                if (in_array($field, $passColumns, true)) {
+                                    continue;
+                                }
+                                if (
+                                    !isset($adminDefinitions[$field])
+                                    || $adminDefinitions[$field] !== $definition
+                                ) {
+                                    throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                                }
+                            }
+                            foreach ($adminDefinitions as $field => $definition) {
+                                if (in_array($field, $passColumns, true)) {
+                                    continue;
+                                }
+                                if (
+                                    !isset($invoiceDefinitions[$field])
+                                    || $invoiceDefinitions[$field] !== $definition
+                                ) {
+                                    throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
+                                }
+                                $transferFields[] = $field;
+                            }
+
+                            $quotedFields = [];
+                            foreach ($transferFields as $field) {
+                                if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
+                                    throw new mysqli_sql_exception("An invoice column name is invalid.");
+                                }
+                                $quotedFields[] = "`" . $field . "`";
+                            }
+                            $fieldList = implode(", ", $quotedFields);
+                            $sendToAdmin = $conn->prepare(
+                                "INSERT INTO `admin_invoices` (" . $fieldList . ") "
+                                . "SELECT " . $fieldList . " FROM `invoices` "
+                                . "WHERE `" . $statusIdColumn . "` = ?"
+                            );
+                            if ($sendToAdmin === false) {
+                                throw new mysqli_sql_exception($conn->error);
+                            }
+                            $sendToAdmin->bind_param("s", $invoiceId);
+                            if (!$sendToAdmin->execute()) {
+                                throw new mysqli_sql_exception($sendToAdmin->error);
+                            }
+                            if ($sendToAdmin->affected_rows !== 1) {
+                                $sendToAdmin->close();
+                                throw new mysqli_sql_exception("The invoice was not added to Admin invoices.");
+                            }
+                            $sendToAdmin->close();
+                        }
+
                         $markLayoutPassed = $conn->prepare(
                             "UPDATE `invoices` SET `pass_layout` = 'PASS' WHERE `" . $statusIdColumn . "` = ?"
                         );
@@ -164,19 +271,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_work"])) {
                             throw new mysqli_sql_exception($conn->error);
                         }
                         $transactionStarted = false;
-                        $layout_action_success = "Invoice and work file sent to Production.";
+                        $layout_action_success = "Invoice sent to " . $departmentNames[$department] . ".";
+                        if ($department !== "production" && is_file($workFilePath)) {
+                            unlink($workFilePath);
+                        }
                     } catch (mysqli_sql_exception $exception) {
                         if ($transactionStarted) {
                             try {
                                 $conn->rollback();
                             } catch (mysqli_sql_exception $rollbackException) {
-                                error_log("Unable to roll back Production handoff: " . $rollbackException->getMessage());
+                                error_log("Unable to roll back Layout handoff: " . $rollbackException->getMessage());
                             }
                         }
                         if (is_file($workFilePath)) {
                             unlink($workFilePath);
                         }
-                        error_log("Unable to send Layout invoice to Production: " . $exception->getMessage());
+                        error_log(
+                            "Unable to send Layout invoice to " . $departmentNames[$department] . ": "
+                            . $exception->getMessage()
+                        );
                         $layout_action_error = "Invoice was not sent: " . $exception->getMessage();
                     }
                 }

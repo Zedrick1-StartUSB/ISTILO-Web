@@ -42,35 +42,16 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
                 <span class="badge rounded-pill text-bg-secondary px-3 py-2"><?= htmlspecialchars(date("l, F j, Y")) ?></span>
             </header>
 
-            <div class="alert alert-info" role="note">
-                Attendance controls are a UI preview only. Adding employees and recording attendance are not connected yet.
-            </div>
-
-            <section class="card shadow-sm border-0 mb-4" aria-labelledby="addEmployeeTitle">
-                <div class="card-header bg-white py-3">
-                    <p class="overline mb-1">TEAM ROSTER</p>
-                    <h2 class="h5 mb-0" id="addEmployeeTitle">Add an employee</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-8">
-                            <label class="form-label" for="employeeName">Employee name</label>
-                            <input class="form-control" id="employeeName" type="text" placeholder="Enter employee name">
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <button class="btn btn-success w-100" type="button">Add employee</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section class="card shadow-sm border-0" aria-labelledby="todayAttendanceTitle">
                 <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
                     <div>
                         <p class="overline mb-1">DAILY RECORD</p>
                         <h2 class="h5 mb-0" id="todayAttendanceTitle">Today's attendance</h2>
                     </div>
-                    <span class="badge rounded-pill text-bg-success">2 / 3 checked in</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill text-bg-success">2 / 3 checked in</span>
+                        <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Add employee</button>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -111,5 +92,30 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
             </section>
         </main>
     </div>
+
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <p class="overline mb-1">TEAM ROSTER</p>
+                        <h2 class="modal-title h5 mb-0" id="addEmployeeModalTitle">Add an employee</h2>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label" for="employeeName">Employee name</label>
+                    <input class="form-control" id="employeeName" type="text" placeholder="Enter employee name">
+                    <p class="form-text mb-0">Employee records are not connected yet; this form is a UI preview.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" type="button" data-bs-dismiss="modal">Add employee</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../bootstrap_template/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

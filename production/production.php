@@ -40,9 +40,9 @@ require "production_backend.php";
             <section class="screen-section" id="incoming" aria-labelledby="incoming-title">
             <header class="welcome-header">
                 <div>
-                    <p class="overline">PRODUCTION DESK · FROM LAYOUT</p>
+                    <p class="overline">PRODUCTION DESK · INCOMING</p>
                     <h1 id="incoming-title">Job Orders</h1>
-                    <p class="welcome-subtitle">Invoices and files sent to Production by the Layout team.</p>
+                    <p class="welcome-subtitle">Invoices sent to Production by Admin or Layout.</p>
                 </div>
                 <div class="work-status"><span></span> Ready to make</div>
             </header>
@@ -54,7 +54,7 @@ require "production_backend.php";
 
             <section class="card-surface production-invoice-panel mb-4" aria-labelledby="incoming-production-title">
                 <div class="p-3 border-bottom">
-                    <h2 class="h5 mb-0" id="incoming-production-title">Incoming from Layout</h2>
+                    <h2 class="h5 mb-0" id="incoming-production-title">Incoming invoices</h2>
                 </div>
                 <div class="table-responsive">
                     <table class="table production-invoice-list mb-0">
@@ -84,10 +84,10 @@ require "production_backend.php";
                                             : "";
                                     ?>
                                     <tr>
-                                        <td><?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
-                                        <td><?= htmlspecialchars((string) ($row["customer_name"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
-                                        <td><?= htmlspecialchars((string) ($row["services"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
-                                        <td><?= htmlspecialchars((string) ($row["quantity"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($row["queued_invoice_id"] ?? $row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($row["customer_name"] ?? "Invoice details unavailable"), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($row["services"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($row["quantity"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
                                         <td>
                                             <?php if ($workFileUrl !== ""): ?>
                                                 <a class="production-file-link" href="<?= htmlspecialchars($workFileUrl, ENT_QUOTES, "UTF-8") ?>" target="_blank" rel="noopener">Open file</a>
@@ -97,7 +97,7 @@ require "production_backend.php";
                                         </td>
                                         <td>
                                             <form method="post">
-                                                <button class="btn btn-success" type="submit" name="accept" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Accept</button>
+                                                <button class="btn btn-success" type="submit" name="accept" value="<?= htmlspecialchars((string) ($row["queued_invoice_id"] ?? $row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Accept</button>
                                             </form>
                                         </td>
                                     </tr>

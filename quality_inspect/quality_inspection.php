@@ -101,12 +101,12 @@ require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
                                     <th scope="col">Customer</th>
                                     <th scope="col">Service</th>
                                     <th scope="col">Qty</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if ($qa_working_error !== ""): ?>
-                                    <tr><td colspan="5" class="production-empty-state"><?= htmlspecialchars($qa_working_error, ENT_QUOTES, "UTF-8") ?></td></tr>
+                                        <tr><td colspan="5" class="production-empty-state"><?= htmlspecialchars($qa_working_error, ENT_QUOTES, "UTF-8") ?></td></tr>
                                 <?php elseif (count($qa_working_rows) > 0): ?>
                                     <?php foreach ($qa_working_rows as $row): ?>
                                         <tr>
@@ -115,9 +115,18 @@ require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
                                             <td><?= htmlspecialchars((string) ($row["services"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
                                             <td><?= htmlspecialchars((string) ($row["quantity"] ?? "N/A"), ENT_QUOTES, "UTF-8") ?></td>
                                             <td>
-                                                <form method="post">
-                                                    <button class="btn btn-success btn-sm" type="submit" name="complete" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Complete</button>
-                                                </form>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <form method="post">
+                                                        <button class="btn btn-success btn-sm" type="submit" name="complete" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Complete</button>
+                                                    </form>
+                                                    <button
+                                                        class="btn btn-outline-primary btn-sm"
+                                                        type="button"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#qaSendWorkModal"
+                                                        data-invoice="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                                    >Send</button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -131,5 +140,54 @@ require __DIR__ . DIRECTORY_SEPARATOR . "quality_inspection_backend.php";
             </section>
         </main>
     </div>
+
+    <div class="modal fade" id="qaSendWorkModal" tabindex="-1" aria-labelledby="qaSendWorkModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <div>
+                            <p class="overline mb-1">PASS IT ALONG</p>
+                            <h2 class="modal-title h5 mb-0" id="qaSendWorkModalTitle">Send QA work</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="invoice_id" id="qaSendInvoiceId" value="<?= htmlspecialchars($qa_send_modal_values["invoice_id"], ENT_QUOTES, "UTF-8") ?>">
+                        <p class="mb-3">Invoice <strong id="qaSendInvoiceLabel"><?= htmlspecialchars($qa_send_modal_values["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong></p>
+                        <label class="form-label" for="qaSendDepartment">Send to department</label>
+                        <select class="form-select" name="department" id="qaSendDepartment" required>
+                            <option value="" <?= $qa_send_modal_values["department"] === "" ? "selected" : "" ?> disabled>Choose a department</option>
+                            <option value="admin" <?= $qa_send_modal_values["department"] === "admin" ? "selected" : "" ?>>Admin</option>
+                            <option value="layout" <?= $qa_send_modal_values["department"] === "layout" ? "selected" : "" ?>>Layout</option>
+                            <option value="production" <?= $qa_send_modal_values["department"] === "production" ? "selected" : "" ?>>Production</option>
+                        </select>
+                        <div class="mt-3" id="qaWorkFileGroup" hidden>
+                            <label class="form-label" for="qaWorkFile">File to send to Production</label>
+                            <input class="form-control" type="file" name="work_file" id="qaWorkFile" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
+                            <p class="form-text mb-0">PDF, PNG, or JPEG · Maximum 10 MB</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="submit" name="send_qa_work" value="1">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../bootstrap_template/js/bootstrap.bundle.min.js"></script>
+    <script src="quality_inspection.js"></script>
+    <?php if ($qa_action_error !== "" && $qa_send_modal_values["invoice_id"] !== ""): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var modal = document.getElementById("qaSendWorkModal");
+                if (modal) {
+                    bootstrap.Modal.getOrCreateInstance(modal).show();
+                }
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>

@@ -387,10 +387,11 @@ if ($invoiceIdColumn !== "") {
 
     try {
         $incomingInvoices = "
-            SELECT i.*" . $invoiceIdSelection . ", pi.`file` AS `work_file_name`
-            FROM `invoices` i
-            INNER JOIN `production_incoming` pi ON i.`" . $invoiceIdColumn . "` = pi.`invoice_id`
-            ORDER BY i.`" . $invoiceIdColumn . "` DESC
+            SELECT i.*" . $invoiceIdSelection . ", pi.`invoice_id` AS `queued_invoice_id`, "
+            . "pi.`file` AS `work_file_name`
+            FROM `production_incoming` pi
+            LEFT JOIN `invoices` i ON i.`" . $invoiceIdColumn . "` = pi.`invoice_id`
+            ORDER BY pi.`invoice_id` DESC
         ";
         $queryIncomingInvoices = $conn->query($incomingInvoices);
         if ($queryIncomingInvoices === false) {

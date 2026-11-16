@@ -52,10 +52,15 @@ $invoice_action_success = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
     $invoiceId = trim((string) $_POST["send-to"]);
-    $department = (string) ($_POST["department"] ?? "");
+    $department = strtolower(trim((string) ($_POST["department"] ?? "")));
+    $departments = [
+        "layout" => ["name" => "Layout", "table" => "layout_artist_incoming"],
+        "production" => ["name" => "Production", "table" => "production_incoming"],
+        "qa" => ["name" => "QA", "table" => "qa_incoming"],
+    ];
 
-    if ($department !== "layout") {
-        $invoice_action_error = "Only Layout transfers are configured. The invoice remains in Admin.";
+    if (!isset($departments[$department])) {
+        $invoice_action_error = "Choose a valid department. The invoice remains in Admin.";
     } elseif ($invoiceId === "") {
         $invoice_action_error = "The invoice could not be identified.";
     } else {
@@ -161,17 +166,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
             }
             $copyInvoice->close();
 
-            $addLayoutIncoming = $conn->prepare(
-                "INSERT INTO `layout_artist_incoming` (`invoice_id`) VALUES (?)"
-            );
-            if ($addLayoutIncoming === false) {
-                throw new mysqli_sql_exception($conn->error);
+            switch ($department) {
+                case "layout":
+                case "qa":
+                    $destinationTable = $departments[$department]["table"];
+                    $addDepartmentIncoming = $conn->prepare(
+                        "INSERT INTO `" . $destinationTable . "` (`invoice_id`) VALUES (?)"
+                    );
+                    if ($addDepartmentIncoming === false) {
+                        throw new mysqli_sql_exception($conn->error);
+                    }
+                    $addDepartmentIncoming->bind_param("s", $invoiceId);
+                    if (!$addDepartmentIncoming->execute()) {
+                        throw new mysqli_sql_exception($addDepartmentIncoming->error);
+                    }
+                    if ($addDepartmentIncoming->affected_rows !== 1) {
+                        $addDepartmentIncoming->close();
+                        throw new mysqli_sql_exception(
+                            "The invoice was not added to " . $departments[$department]["name"] . " incoming."
+                        );
+                    }
+                    $addDepartmentIncoming->close();
+                    break;
+                case "production":
+                    $addProductionIncoming = $conn->prepare(
+                        "INSERT INTO `" . $departments[$department]["table"] . "` (`invoice_id`, `file`) VALUES (?, '')"
+                    );
+                    if ($addProductionIncoming === false) {
+                        throw new mysqli_sql_exception($conn->error);
+                    }
+                    $addProductionIncoming->bind_param("s", $invoiceId);
+                    if (!$addProductionIncoming->execute()) {
+                        throw new mysqli_sql_exception($addProductionIncoming->error);
+                    }
+                    if ($addProductionIncoming->affected_rows !== 1) {
+                        $addProductionIncoming->close();
+                        throw new mysqli_sql_exception("The invoice was not added to Production incoming.");
+                    }
+                    $addProductionIncoming->close();
+                    break;
+                default:
+                    throw new mysqli_sql_exception("The selected department has no incoming table.");
             }
-            $addLayoutIncoming->bind_param("s", $invoiceId);
-            if (!$addLayoutIncoming->execute()) {
-                throw new mysqli_sql_exception($addLayoutIncoming->error);
-            }
-            $addLayoutIncoming->close();
 
             $removeAdminInvoice = $conn->prepare(
                 "DELETE FROM `admin_invoices` WHERE `" . $identifierColumn . "` = ?"
@@ -193,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
                 throw new mysqli_sql_exception($conn->error);
             }
             $transactionStarted = false;
-            $invoice_action_success = "Invoice sent to Layout and removed from Admin logs.";
+            $invoice_action_success = "Invoice sent to " . $departments[$department]["name"] . " and removed from Admin logs.";
         } catch (mysqli_sql_exception $exception) {
             if ($transactionStarted) {
                 try {
