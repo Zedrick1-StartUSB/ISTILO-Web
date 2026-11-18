@@ -44,6 +44,7 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
             <nav class="studio-nav" aria-label="Layout workspace">
                 <a class="studio-nav-link" href="layout_work.php"><span aria-hidden="true">⌂</span> Dashboard</a>
                 <a class="studio-nav-link selected" href="layout_materials.php" aria-current="page"><span aria-hidden="true">◇</span> Materials</a>
+                <a class="studio-nav-link" href="layout_materials_archive.php"><span aria-hidden="true">▤</span> Archive</a>
             </nav>
 
             <form class="studio-logout" method="POST">
@@ -280,11 +281,11 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
                         <input type="hidden" name="material_key" id="deleteMaterialKey" value="<?= htmlspecialchars($materials_modal_to_open === "deleteMaterialModal" ? $materials_form_values["material_key"] : "", ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="material" id="deleteMaterialNameInput" value="<?= htmlspecialchars($materials_modal_to_open === "deleteMaterialModal" ? $materials_form_values["material"] : "", ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="search" value="<?= htmlspecialchars($materials_search, ENT_QUOTES, "UTF-8") ?>">
-                        <p class="materials-delete-copy">This will permanently remove <strong id="deleteMaterialName"><?= htmlspecialchars($materials_modal_to_open === "deleteMaterialModal" ? $materials_form_values["material"] : "", ENT_QUOTES, "UTF-8") ?></strong> from the inventory.</p>
+                        <p class="materials-delete-copy">This will move <strong id="deleteMaterialName"><?= htmlspecialchars($materials_modal_to_open === "deleteMaterialModal" ? $materials_form_values["material"] : "", ENT_QUOTES, "UTF-8") ?></strong> to the archive.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="materials-action-button" data-bs-dismiss="modal">Cancel</button>
-                        <button class="materials-action-button materials-delete-button materials-modal-delete-button" type="submit">Delete material</button>
+                        <button class="materials-action-button materials-delete-button materials-modal-delete-button" type="submit">Move to archive</button>
                     </div>
                 </form>
             </div>

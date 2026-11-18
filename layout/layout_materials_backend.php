@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "dbconn.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . "layout_materials_archive_storage.php";
 
 $materials = [];
 $materials_error = "";
@@ -41,6 +42,7 @@ try {
     if (!preg_match('/\A[A-Za-z0-9_]+\z/', $material_key_column)) {
         throw new mysqli_sql_exception("The material identifier column is invalid.");
     }
+    ensure_layout_materials_archive_table($conn);
 } catch (mysqli_sql_exception $exception) {
     error_log("Unable to inspect Layout materials table: " . $exception->getMessage());
     $materials_error = "Materials could not be loaded. Check the layout_materials_holder table.";
@@ -237,6 +239,24 @@ if ($materials_error === "" && $_SERVER["REQUEST_METHOD"] === "POST") {
                 }
                 $lockMaterial->close();
 
+                $archiveMaterial = $conn->prepare(
+                    "INSERT INTO `layout_materials_archive` (`material`, `quantity`) "
+                    . "SELECT `material`, `quantity` FROM `layout_materials_holder` "
+                    . "WHERE `" . $material_key_column . "` = ?"
+                );
+                if ($archiveMaterial === false) {
+                    throw new mysqli_sql_exception($conn->error);
+                }
+                $archiveMaterial->bind_param("s", $materialKey);
+                if (!$archiveMaterial->execute()) {
+                    throw new mysqli_sql_exception($archiveMaterial->error);
+                }
+                if ($archiveMaterial->affected_rows !== 1) {
+                    $archiveMaterial->close();
+                    throw new RuntimeException("The selected material could not be archived.");
+                }
+                $archiveMaterial->close();
+
                 $deleteMaterial = $conn->prepare(
                     "DELETE FROM `layout_materials_holder` WHERE `" . $material_key_column . "` = ?"
                 );
@@ -252,7 +272,7 @@ if ($materials_error === "" && $_SERVER["REQUEST_METHOD"] === "POST") {
                     throw new RuntimeException("The material could not be deleted.");
                 }
                 $deleteMaterial->close();
-                $materials_action_success = "Material deleted from inventory.";
+                $materials_action_success = "Material moved to the archive.";
             }
 
             if (!$conn->commit()) {

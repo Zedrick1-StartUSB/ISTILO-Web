@@ -43,6 +43,7 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
             <nav class="studio-nav" aria-label="Layout workspace">
                 <a class="studio-nav-link selected" href="layout_work.php" aria-current="page"><span aria-hidden="true">⌂</span> Dashboard</a>
                 <a class="studio-nav-link" href="layout_materials.php"><span aria-hidden="true">◇</span> Materials</a>
+                <a class="studio-nav-link" href="layout_materials_archive.php"><span aria-hidden="true">▤</span> Archive</a>
             </nav>
 
             <form class="studio-logout" method="POST">
