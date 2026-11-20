@@ -470,6 +470,13 @@ textarea.form-control {
     margin-bottom: 17px;
 }
 
+.logs-intro-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
 .record-count {
     padding: 6px 9px;
     border-radius: 20px;
@@ -477,6 +484,414 @@ textarea.form-control {
     color: #68796e;
     font-size: 9px;
     white-space: nowrap;
+}
+
+.completed-project-button {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 13px 0 9px;
+    border: 1px solid #d5e1d7;
+    border-radius: 9px;
+    background: linear-gradient(180deg, #f8fbf8, #edf4ee);
+    box-shadow: 0 2px 6px rgba(55, 75, 62, 0.06);
+    color: #536d5b;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.completed-project-button:hover {
+    border-color: var(--accent);
+    background: var(--accent-dark);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(68, 96, 76, 0.18);
+}
+
+.completed-project-button:focus-visible,
+.completed-project-dismiss:focus-visible,
+.completed-project-close:focus-visible {
+    outline: 2px solid #718a79;
+    outline-offset: 3px;
+}
+
+.completed-project-button-icon {
+    display: grid;
+    width: 23px;
+    height: 23px;
+    place-items: center;
+    border-radius: 7px;
+    background: #dce9dd;
+    color: #55745d;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.completed-project-button:hover .completed-project-button-icon {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.completed-project-dialog {
+    width: min(1500px, calc(100vw - 32px));
+    max-width: none;
+    max-height: min(88vh, 820px);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #dce5dc;
+    border-radius: 15px;
+    background: #fffefa;
+    color: var(--ink);
+    box-shadow: 0 24px 70px rgba(34, 48, 39, 0.22);
+}
+
+.completed-project-dialog::backdrop {
+    background: rgba(42, 55, 46, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+.completed-project-modal-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e6ece5;
+    background: linear-gradient(120deg, #edf4ee 0%, #f6f7f0 62%, #fbf8ef 100%);
+}
+
+.completed-project-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.completed-project-modal-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 1px solid #d5e2d5;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(65, 87, 70, 0.08);
+    color: #5b7b62;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.completed-project-modal-heading h2 {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 24px;
+}
+
+.completed-project-modal-heading p:last-child {
+    margin: 3px 0 0;
+    color: #7e8b82;
+    font-size: 11px;
+}
+
+.completed-project-close {
+    display: grid;
+    width: 35px;
+    height: 35px;
+    flex: 0 0 35px;
+    place-items: center;
+    border: 1px solid #d9e3da;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.78);
+    color: #68766d;
+    cursor: pointer;
+    font-size: 21px;
+    line-height: 1;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.completed-project-close:hover {
+    border-color: #bdcfc0;
+    background: #e9f1e9;
+    color: #435249;
+}
+
+.completed-project-modal-content {
+    padding: 20px 24px 0;
+}
+
+.completed-project-dialog .table-responsive {
+    max-height: min(52vh, 500px);
+    overflow: auto;
+    border: 1px solid #e5ebe5;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.completed-project-dialog .invoice-table {
+    margin-bottom: 0;
+}
+
+.completed-project-dialog .to-ship-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.completed-project-dialog .to-ship-table th,
+.completed-project-dialog .to-ship-table td {
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(1),
+.completed-project-dialog .to-ship-table td:nth-child(1) {
+    width: 9%;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(2),
+.completed-project-dialog .to-ship-table td:nth-child(2) {
+    width: 15%;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(3),
+.completed-project-dialog .to-ship-table td:nth-child(3) {
+    width: 16%;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(4),
+.completed-project-dialog .to-ship-table td:nth-child(4) {
+    width: 14%;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(5),
+.completed-project-dialog .to-ship-table td:nth-child(5) {
+    width: 10%;
+}
+
+.completed-project-dialog .to-ship-table th:nth-child(n + 6),
+.completed-project-dialog .to-ship-table td:nth-child(n + 6) {
+    width: 9%;
+}
+
+.invoice-view-button {
+    min-height: 30px;
+    padding: 0 11px;
+    border: 1px solid #d5e1d7;
+    border-radius: 7px;
+    background: #edf4ee;
+    color: #536d5b;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 700;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.invoice-view-button:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+}
+
+.invoice-view-button:focus-visible {
+    outline: 2px solid #718a79;
+    outline-offset: 2px;
+}
+
+.invoice-details-dialog {
+    width: min(900px, calc(100vw - 32px));
+}
+
+.invoice-details-content {
+    max-height: min(58vh, 560px);
+    overflow-y: auto;
+}
+
+.invoice-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.invoice-detail-card {
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid #e6ece5;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.invoice-detail-wide {
+    grid-column: 1 / -1;
+}
+
+.invoice-detail-card dt {
+    margin-bottom: 5px;
+    color: #829087;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+}
+
+.invoice-detail-card dd {
+    margin: 0;
+    color: #435249;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.invoice-complete-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: linear-gradient(120deg, #f3f8f2, #fbf8ef);
+}
+
+.invoice-complete-card > div {
+    display: grid;
+    gap: 4px;
+}
+
+.invoice-complete-card strong {
+    color: #435249;
+    font-size: 11px;
+}
+
+.invoice-complete-card small {
+    color: #7e8b82;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.project-completed-button {
+    min-height: 36px;
+    flex: 0 0 auto;
+    padding: 0 13px;
+    border: 1px solid #5e7566;
+    border-radius: 7px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: 700;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.project-completed-button:hover {
+    background: var(--accent-dark);
+    box-shadow: 0 3px 8px rgba(68, 96, 76, 0.16);
+}
+
+.project-completed-button:focus-visible {
+    outline: 2px solid #718a79;
+    outline-offset: 3px;
+}
+
+.completed-project-dialog .invoice-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.pass-value {
+    display: inline-flex;
+    min-width: 48px;
+    justify-content: center;
+    padding: 4px 7px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.pass-true {
+    background: #e7f0e8;
+    color: #58745e;
+}
+
+.pass-false {
+    background: #f4f0e2;
+    color: #8a7950;
+}
+
+.completed-project-empty {
+    height: 190px;
+    text-align: center;
+    white-space: normal !important;
+}
+
+.completed-project-empty > div {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    color: #526357;
+}
+
+.completed-project-empty-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 12px;
+    background: #eaf2e9;
+    color: #69836b;
+    font-size: 16px;
+}
+
+.completed-project-empty strong {
+    font-size: 11px;
+}
+
+.completed-project-empty small {
+    color: #89958b;
+    font-size: 9px;
+}
+
+.completed-project-dialog .invoice-message {
+    margin: 0;
+}
+
+.completed-project-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 14px 24px 18px;
+    border-top: 1px solid #e9eee8;
+    background: #fdfefd;
+}
+
+.completed-project-modal-footer > span {
+    color: #89958b;
+    font-size: 9px;
+}
+
+.completed-project-dismiss {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid #d2dfd4;
+    border-radius: 7px;
+    background: #eaf2e9;
+    color: #536d5b;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.completed-project-dismiss:hover {
+    border-color: #b7cbb9;
+    background: #dce9dd;
 }
 
 .log-filters {
@@ -597,6 +1012,69 @@ textarea.form-control {
 
     .log-filters {
         flex-direction: column;
+    }
+
+    .logs-intro {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .logs-intro-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .completed-project-dialog {
+        width: calc(100vw - 20px);
+        max-height: 90vh;
+    }
+
+    .completed-project-dialog .to-ship-table {
+        font-size: 8px;
+    }
+
+    .invoice-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-detail-wide {
+        grid-column: auto;
+    }
+
+    .invoice-complete-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .completed-project-dialog .to-ship-table .pass-value {
+        min-width: 0;
+        padding-right: 2px;
+        padding-left: 2px;
+        font-size: 7px;
+    }
+
+    .completed-project-dialog .to-ship-table thead th,
+    .completed-project-dialog .to-ship-table tbody td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .completed-project-modal-heading {
+        padding: 16px 14px;
+    }
+
+    .completed-project-modal-content {
+        padding: 14px 12px 0;
+    }
+
+    .completed-project-modal-footer {
+        align-items: flex-start;
+        padding: 12px 14px 14px;
+    }
+
+    .completed-project-modal-footer > span {
+        max-width: 190px;
+        line-height: 1.5;
     }
 
     .search-input,

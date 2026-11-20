@@ -2,10 +2,22 @@
 session_start();
 require "../logout.php";
 
-if($_SESSION["role"] != "owner"){
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "owner") {
     header("Location: /ISTILO_SYSTEM/Login/html/login.php");
     exit();
 }
+
+$owner_data_error = "";
+$owner_materials = [];
+try {
+    require_once __DIR__ . DIRECTORY_SEPARATOR . "owner_backend.php";
+    $owner_materials = ownerLoadMaterials($conn);
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to load Owner materials: " . $exception->getMessage());
+    $owner_data_error = "Materials data could not be loaded.";
+}
+$owner_material_metrics = ownerBuildMaterialMetrics($owner_materials);
+$material_swatch_classes = ["swatch-cream", "swatch-blue", "swatch-pink", "swatch-green", "swatch-yellow", "swatch-lilac"];
 
 ?>
 <!DOCTYPE html>
@@ -22,7 +34,7 @@ if($_SESSION["role"] != "owner"){
 <body>
     <div class="dashboard-layout">
         <aside class="sidebar">
-            <a class="brand" href="dashboard.html"><span class="brand-mark">l.</span><span>little label</span></a>
+            <a class="brand" href="dashboard.php"><span class="brand-mark">l.</span><span>little label</span></a>
             <p class="nav-caption">MENU</p>
             <nav class="side-nav" aria-label="Main navigation">
                 <a class="side-link" href="dashboard.php">Dashboard</a>
@@ -43,31 +55,51 @@ if($_SESSION["role"] != "owner"){
                     <h1>Materials</h1>
                     <p class="page-subtitle">A quick check-in on the things that make your products.</p>
                 </div>
-                <a class="add-product-button" href="#materials-table"><span aria-hidden="true">＋</span> Add material</a>
+                <span class="subtle-badge">Live inventory</span>
             </header>
 
+            <?php if ($owner_data_error !== ""): ?>
+                <p class="alert alert-danger" role="alert"><?= htmlspecialchars($owner_data_error, ENT_QUOTES, "UTF-8") ?></p>
+            <?php endif; ?>
+
             <section class="page-stats" aria-label="Materials summary">
-                <article class="page-stat"><span>Material types</span><strong>18</strong><small>In your inventory</small></article>
-                <article class="page-stat"><span>Running low</span><strong>3</strong><small>Worth a restock</small></article>
-                <article class="page-stat"><span>In stock</span><strong>15</strong><small>Looking good</small></article>
-                <article class="page-stat"><span>Last restock</span><strong class="date-value">May 14</strong><small>Four days ago</small></article>
+                <article class="page-stat"><span>Material types</span><strong><?= (int) $owner_material_metrics["material_count"] ?></strong><small>In inventory</small></article>
+                <article class="page-stat"><span>Total units</span><strong><?= (int) $owner_material_metrics["total_units"] ?></strong><small>Recorded quantity</small></article>
+                <article class="page-stat"><span>In stock</span><strong><?= (int) $owner_material_metrics["in_stock"] ?></strong><small>Types with quantity above zero</small></article>
+                <article class="page-stat"><span>Out of stock</span><strong><?= (int) $owner_material_metrics["out_of_stock"] ?></strong><small>Types at zero quantity</small></article>
             </section>
 
             <section class="panel page-panel" id="materials-table">
                 <div class="panel-heading page-panel-heading">
-                    <div><h2>Materials inventory</h2><p>Keep an eye on supplies for your next collection</p></div>
-                    <span class="subtle-badge">18 materials</span>
+                    <div><h2>Materials inventory</h2><p>Current quantities recorded by Layout</p></div>
+                    <span class="subtle-badge"><?= (int) $owner_material_metrics["material_count"] ?> materials</span>
                 </div>
                 <div class="table-responsive">
                     <table class="table data-table align-middle mb-0">
-                        <thead><tr><th>MATERIAL</th><th>TYPE</th><th>QUANTITY</th><th>LAST RESTOCKED</th><th>STATUS</th></tr></thead>
+                        <thead><tr><th>MATERIAL</th><th>QUANTITY</th><th>STATUS</th></tr></thead>
                         <tbody>
-                            <tr><td><span class="material-name"><span class="swatch swatch-cream"></span> Cotton jersey</span></td><td>Fabric</td><td>42 yards</td><td>May 14, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
-                            <tr><td><span class="material-name"><span class="swatch swatch-blue"></span> Denim twill</span></td><td>Fabric</td><td>8 yards</td><td>May 10, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
-                            <tr><td><span class="material-name"><span class="swatch swatch-pink"></span> Recycled thread</span></td><td>Thread</td><td>24 spools</td><td>May 12, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
-                            <tr><td><span class="material-name"><span class="swatch swatch-green"></span> Linen blend</span></td><td>Fabric</td><td>6 yards</td><td>May 08, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
-                            <tr><td><span class="material-name"><span class="swatch swatch-yellow"></span> Wooden buttons</span></td><td>Fastener</td><td>160 pieces</td><td>May 11, 2026</td><td><span class="status-pill status-in-stock">In stock</span></td></tr>
-                            <tr><td><span class="material-name"><span class="swatch swatch-lilac"></span> Kraft mailers</span></td><td>Packaging</td><td>12 pieces</td><td>May 02, 2026</td><td><span class="status-pill status-low">Running low</span></td></tr>
+                            <?php if ($owner_materials !== []): ?>
+                                <?php foreach ($owner_materials as $index => $material): ?>
+                                    <?php
+                                    $quantity = (int) ($material["quantity"] ?? 0);
+                                    $materialStatus = $quantity > 0 ? "In stock" : "Out of stock";
+                                    $materialStatusClass = $quantity > 0 ? "status-in-stock" : "status-low";
+                                    $swatchClass = $material_swatch_classes[$index % count($material_swatch_classes)];
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <span class="material-name">
+                                                <span class="swatch <?= htmlspecialchars($swatchClass, ENT_QUOTES, "UTF-8") ?>"></span>
+                                                <?= htmlspecialchars((string) ($material["material"] ?? ""), ENT_QUOTES, "UTF-8") ?>
+                                            </span>
+                                        </td>
+                                        <td><?= $quantity ?></td>
+                                        <td><span class="status-pill <?= htmlspecialchars($materialStatusClass, ENT_QUOTES, "UTF-8") ?>"><?= htmlspecialchars($materialStatus, ENT_QUOTES, "UTF-8") ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="3">No material records are available.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

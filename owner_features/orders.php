@@ -2,10 +2,21 @@
 session_start();
 require "../logout.php";
 
-if($_SESSION["role"] != "owner"){
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "owner") {
     header("Location: /ISTILO_SYSTEM/Login/html/login.php");
     exit();
 }
+
+$owner_data_error = "";
+$owner_orders = [];
+try {
+    require_once __DIR__ . DIRECTORY_SEPARATOR . "owner_backend.php";
+    $owner_orders = ownerLoadInvoices($conn);
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to load Owner orders: " . $exception->getMessage());
+    $owner_data_error = "Order data could not be loaded.";
+}
+$owner_invoice_metrics = ownerBuildInvoiceMetrics($owner_orders);
 
 ?>
 <!DOCTYPE html>
@@ -22,7 +33,7 @@ if($_SESSION["role"] != "owner"){
 <body>
     <div class="dashboard-layout">
         <aside class="sidebar">
-            <a class="brand" href="dashboard.html"><span class="brand-mark">l.</span><span>little label</span></a>
+            <a class="brand" href="dashboard.php"><span class="brand-mark">l.</span><span>little label</span></a>
             <p class="nav-caption">MENU</p>
             <nav class="side-nav" aria-label="Main navigation">
                 <a class="side-link" href="dashboard.php">Dashboard</a>
@@ -43,30 +54,48 @@ if($_SESSION["role"] != "owner"){
                     <h1>Orders</h1>
                     <p class="page-subtitle">Keep track of what customers are waiting for.</p>
                 </div>
-                <a class="add-product-button" href="#orders-table"><span aria-hidden="true">＋</span> New order</a>
+                <span class="subtle-badge">Live order records</span>
             </header>
 
+            <?php if ($owner_data_error !== ""): ?>
+                <p class="alert alert-danger" role="alert"><?= htmlspecialchars($owner_data_error, ENT_QUOTES, "UTF-8") ?></p>
+            <?php endif; ?>
+
             <section class="page-stats" aria-label="Order summary">
-                <article class="page-stat"><span>All orders</span><strong>28</strong><small>Orders this week</small></article>
-                <article class="page-stat"><span>Needs packing</span><strong>7</strong><small>Ready to prepare</small></article>
-                <article class="page-stat"><span>On the way</span><strong>12</strong><small>Shipped to customers</small></article>
-                <article class="page-stat"><span>Completed</span><strong>9</strong><small>Delivered with care</small></article>
+                <article class="page-stat"><span>All invoices</span><strong><?= (int) $owner_invoice_metrics["invoice_count"] ?></strong><small>Across the workflow</small></article>
+                <article class="page-stat"><span>In Admin</span><strong><?= (int) $owner_invoice_metrics["stages"]["Admin"] ?></strong><small>Waiting for dispatch</small></article>
+                <article class="page-stat"><span>In Production</span><strong><?= (int) $owner_invoice_metrics["stages"]["Production"] ?></strong><small>Incoming or in progress</small></article>
+                <article class="page-stat"><span>Ready to ship</span><strong><?= (int) $owner_invoice_metrics["stages"]["Ready to ship"] ?></strong><small>Completed QA</small></article>
             </section>
 
             <section class="panel page-panel" id="orders-table">
                 <div class="panel-heading page-panel-heading">
-                    <div><h2>All orders</h2><p>A little list of your recent shop orders</p></div>
-                    <span class="subtle-badge">Updated today</span>
+                    <div><h2>All invoices</h2><p>Customer orders and their current workflow stage</p></div>
+                    <span class="subtle-badge"><?= (int) $owner_invoice_metrics["invoice_count"] ?> records</span>
                 </div>
                 <div class="table-responsive">
                     <table class="table data-table align-middle mb-0">
-                        <thead><tr><th>ORDER</th><th>CUSTOMER</th><th>DATE</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th></tr></thead>
+                        <thead><tr><th>INVOICE</th><th>CUSTOMER</th><th>DUE DATE</th><th>SERVICE</th><th>QTY</th><th>TOTAL</th><th>STATUS</th></tr></thead>
                         <tbody>
-                            <tr><td><strong>#LL-1048</strong></td><td>Ava Mitchell</td><td>May 18, 2026</td><td>2 items</td><td><strong>$86.00</strong></td><td><span class="status-pill status-packing">Packing</span></td></tr>
-                            <tr><td><strong>#LL-1047</strong></td><td>Riley Kim</td><td>May 18, 2026</td><td>1 item</td><td><strong>$42.50</strong></td><td><span class="status-pill status-shipped">Shipped</span></td></tr>
-                            <tr><td><strong>#LL-1046</strong></td><td>Sam Jones</td><td>May 17, 2026</td><td>3 items</td><td><strong>$119.00</strong></td><td><span class="status-pill status-new">New</span></td></tr>
-                            <tr><td><strong>#LL-1045</strong></td><td>Taylor Reed</td><td>May 17, 2026</td><td>2 items</td><td><strong>$64.00</strong></td><td><span class="status-pill status-delivered">Delivered</span></td></tr>
-                            <tr><td><strong>#LL-1044</strong></td><td>Casey Park</td><td>May 16, 2026</td><td>1 item</td><td><strong>$35.00</strong></td><td><span class="status-pill status-shipped">Shipped</span></td></tr>
+                            <?php if ($owner_orders !== []): ?>
+                                <?php foreach ($owner_orders as $order): ?>
+                                    <?php
+                                    $stage = (string) ($order["current_stage"] ?? "No active work");
+                                    $statusClass = ownerOrderStatusClass($stage);
+                                    ?>
+                                    <tr>
+                                        <td><strong>#<?= htmlspecialchars((string) ($order["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?></strong></td>
+                                        <td><?= htmlspecialchars((string) ($order["customer_name"] ?? "—"), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars(ownerFormatDate($order["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($order["services"] ?? "—"), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><?= htmlspecialchars((string) ($order["quantity"] ?? "—"), ENT_QUOTES, "UTF-8") ?></td>
+                                        <td><strong><?= htmlspecialchars(ownerFormatMoney($order["price"] ?? null), ENT_QUOTES, "UTF-8") ?></strong></td>
+                                        <td><span class="status-pill <?= htmlspecialchars($statusClass, ENT_QUOTES, "UTF-8") ?>"><?= htmlspecialchars($stage, ENT_QUOTES, "UTF-8") ?></span></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="7">No invoice records are available.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

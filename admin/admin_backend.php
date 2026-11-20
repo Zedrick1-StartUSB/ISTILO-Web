@@ -9,6 +9,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
 }
 
 require_once "../dbconn.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "invoice_transfer.php";
 
 function getInvoiceTableColumns(mysqli $conn, string $tableName): array
 {
@@ -49,6 +50,99 @@ $invoice_success = "";
 $invoice_load_error = "";
 $invoice_action_error = "";
 $invoice_action_success = "";
+$completed_project_load_error = "";
+$completed_projects_sql = false;
+$to_ship_load_error = "";
+$to_ship_sql = false;
+$show_invoice_logs = isset($_GET["view"]) && is_string($_GET["view"]) && $_GET["view"] === "logs";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["complete-project"])) {
+    $invoiceId = is_string($_POST["complete-project"]) ? trim($_POST["complete-project"]) : "";
+
+    if ($invoiceId === "") {
+        $invoice_action_error = "The invoice could not be identified.";
+    } else {
+        $transactionStarted = false;
+        try {
+            if (!$conn->begin_transaction()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = true;
+
+            $lockInvoice = $conn->prepare(
+                "SELECT 1 FROM `invoices` WHERE `invoice_id` = ? FOR UPDATE"
+            );
+            if ($lockInvoice === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $lockInvoice->bind_param("s", $invoiceId);
+            if (!$lockInvoice->execute()) {
+                throw new mysqli_sql_exception($lockInvoice->error);
+            }
+            $lockInvoice->store_result();
+            if ($lockInvoice->num_rows !== 1) {
+                $lockInvoice->close();
+                throw new mysqli_sql_exception("The invoice is no longer available to complete.");
+            }
+            $lockInvoice->close();
+
+            $moveInvoice = $conn->prepare(
+                "INSERT INTO `completed_job_orders` "
+                . "(`invoice_id`, `customer_name`, `contact_number`, `customer_address`, `landmarks`, "
+                . "`services`, `quantity`, `price`, `completion_date`, `notes`, `file`, `pass_admin`, "
+                . "`pass_layout`, `pass_production`, `pass_qa`) "
+                . "SELECT `invoice_id`, `customer_name`, `contact_number`, `customer_address`, `landmarks`, "
+                . "`services`, `quantity`, `price`, `completion_date`, `notes`, `file`, `pass_admin`, "
+                . "`pass_layout`, `pass_production`, `pass_qa` "
+                . "FROM `invoices` WHERE `invoice_id` = ?"
+            );
+            if ($moveInvoice === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $moveInvoice->bind_param("s", $invoiceId);
+            if (!$moveInvoice->execute()) {
+                throw new mysqli_sql_exception($moveInvoice->error);
+            }
+            if ($moveInvoice->affected_rows !== 1) {
+                $moveInvoice->close();
+                throw new mysqli_sql_exception("The invoice could not be copied to completed projects.");
+            }
+            $moveInvoice->close();
+
+            $removeInvoice = $conn->prepare(
+                "DELETE FROM `invoices` WHERE `invoice_id` = ?"
+            );
+            if ($removeInvoice === false) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $removeInvoice->bind_param("s", $invoiceId);
+            if (!$removeInvoice->execute()) {
+                throw new mysqli_sql_exception($removeInvoice->error);
+            }
+            if ($removeInvoice->affected_rows !== 1) {
+                $removeInvoice->close();
+                throw new mysqli_sql_exception("The invoice could not be removed from active invoices.");
+            }
+            $removeInvoice->close();
+
+            if (!$conn->commit()) {
+                throw new mysqli_sql_exception($conn->error);
+            }
+            $transactionStarted = false;
+            $invoice_action_success = "Project #" . $invoiceId . " marked as completed and moved to Completed Projects.";
+        } catch (mysqli_sql_exception $exception) {
+            if ($transactionStarted) {
+                try {
+                    $conn->rollback();
+                } catch (mysqli_sql_exception $rollbackException) {
+                    error_log("Unable to roll back project completion: " . $rollbackException->getMessage());
+                }
+            }
+            error_log("Unable to complete Admin invoice: " . $exception->getMessage());
+            $invoice_action_error = "Project was not completed: " . $exception->getMessage();
+        }
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
     $invoiceId = trim((string) $_POST["send-to"]);
@@ -110,21 +204,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
                 throw new mysqli_sql_exception("No valid invoice identifier column was found.");
             }
 
-            $quotedFields = [];
-            $quotedSourceFields = [];
             foreach ($transferFields as $field) {
                 if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
                     throw new mysqli_sql_exception("An invoice column name is invalid.");
                 }
-                $quotedFields[] = "`" . $field . "`";
-                $quotedSourceFields[] = "`" . $field . "`";
             }
-            foreach ($passColumns as $passColumn) {
-                $quotedFields[] = "`" . $passColumn . "`";
-            }
-            $fieldList = implode(", ", $quotedFields);
-            $sourceFieldList = implode(", ", $quotedSourceFields);
-            $passValues = "'PASS', '', '', ''";
 
             if (!$conn->begin_transaction()) {
                 throw new mysqli_sql_exception($conn->error);
@@ -148,23 +232,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send-to"])) {
             }
             $lockInvoice->close();
 
-            $copyInvoice = $conn->prepare(
-                "INSERT INTO `invoices` (" . $fieldList . ") "
-                . "SELECT " . $sourceFieldList . ", " . $passValues . " FROM `admin_invoices` "
-                . "WHERE `" . $identifierColumn . "` = ?"
+            $invoiceCopied = copyInvoiceRecordIfMissing(
+                $conn,
+                "admin_invoices",
+                "invoices",
+                $identifierColumn,
+                $invoiceId,
+                $transferFields,
+                [
+                    "pass_admin" => "PASS",
+                    "pass_layout" => "",
+                    "pass_production" => "",
+                    "pass_qa" => "",
+                ]
             );
-            if ($copyInvoice === false) {
-                throw new mysqli_sql_exception($conn->error);
+            if (!$invoiceCopied) {
+                $markAdminPassed = $conn->prepare(
+                    "UPDATE `invoices` SET `pass_admin` = 'PASS' WHERE `" . $identifierColumn . "` = ?"
+                );
+                if ($markAdminPassed === false) {
+                    throw new mysqli_sql_exception($conn->error);
+                }
+                $markAdminPassed->bind_param("s", $invoiceId);
+                if (!$markAdminPassed->execute()) {
+                    throw new mysqli_sql_exception($markAdminPassed->error);
+                }
+                $markAdminPassed->close();
             }
-            $copyInvoice->bind_param("s", $invoiceId);
-            if (!$copyInvoice->execute()) {
-                throw new mysqli_sql_exception($copyInvoice->error);
-            }
-            if ($copyInvoice->affected_rows !== 1) {
-                $copyInvoice->close();
-                throw new mysqli_sql_exception("The invoice could not be copied to `invoices`.");
-            }
-            $copyInvoice->close();
 
             switch ($department) {
                 case "layout":
@@ -407,6 +501,34 @@ try {
 if ($select_invoice_sql === false && $invoice_load_error === "") {
     error_log("Unable to load admin invoices: " . $conn->error);
     $invoice_load_error = "Invoice records could not be loaded: " . $conn->error;
+}
+
+try {
+    $completed_projects_sql = $conn->query(
+        "SELECT `invoice_id`, `customer_name`, `services`, `completion_date`, `price` "
+        . "FROM `completed_job_orders` ORDER BY `completion_date` ASC, `invoice_id` DESC"
+    );
+    if ($completed_projects_sql === false) {
+        $completed_project_load_error = "Completed projects could not be loaded: " . $conn->error;
+    }
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to load completed projects for Admin: " . $exception->getMessage());
+    $completed_project_load_error = "Completed projects could not be loaded.";
+}
+
+try {
+    $to_ship_sql = $conn->query(
+        "SELECT `invoice_id`, `customer_name`, `contact_number`, `customer_address`, `landmarks`, "
+        . "`services`, `quantity`, `price`, `completion_date`, `notes`, `file`, "
+        . "`pass_admin`, `pass_layout`, `pass_production`, `pass_qa` "
+        . "FROM `invoices` ORDER BY `completion_date` ASC, `invoice_id` DESC"
+    );
+    if ($to_ship_sql === false) {
+        $to_ship_load_error = "Invoices to ship could not be loaded: " . $conn->error;
+    }
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to load invoices to ship for Admin: " . $exception->getMessage());
+    $to_ship_load_error = "Invoices to ship could not be loaded.";
 }
 
 ?>

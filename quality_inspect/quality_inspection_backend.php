@@ -9,6 +9,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "qa") {
 }
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "dbconn.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "invoice_transfer.php";
 
 function getQaInvoiceIdColumn(mysqli $conn): string
 {
@@ -57,9 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
         "layout" => "Layout",
         "production" => "Production",
     ];
-    $upload = $_FILES["work_file"] ?? null;
-    $workFileName = "";
-    $workFilePath = "";
 
     $qa_send_modal_values["invoice_id"] = $invoiceId;
     $qa_send_modal_values["department"] = $department;
@@ -68,43 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
         $qa_action_error = "The QA Work invoice could not be identified.";
     } elseif (!isset($departments[$department])) {
         $qa_action_error = "Choose a valid department. The invoice remains in QA Work.";
-    } elseif (
-        $department === "production"
-        && ($upload === null || $upload["error"] !== UPLOAD_ERR_OK || $upload["size"] > 10 * 1024 * 1024)
-    ) {
-        $qa_action_error = "Choose a PDF, PNG, or JPEG no larger than 10 MB for Production.";
-    }
-
-    if ($qa_action_error === "" && $department === "production") {
-        $fileInfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $fileInfo->file($upload["tmp_name"]);
-        $allowedMimeTypes = [
-            "application/pdf" => "pdf",
-            "image/jpeg" => "jpg",
-            "image/png" => "png",
-        ];
-
-        if (!isset($allowedMimeTypes[$mimeType])) {
-            $qa_action_error = "Choose a PDF, PNG, or JPEG no larger than 10 MB for Production.";
-        } else {
-            $uploadDirectory = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR
-                . "production" . DIRECTORY_SEPARATOR . "uploads";
-            if (
-                !is_dir($uploadDirectory)
-                && !mkdir($uploadDirectory, 0755, true)
-                && !is_dir($uploadDirectory)
-            ) {
-                $qa_action_error = "The work file could not be stored. Please try again.";
-            } else {
-                $workFileName = bin2hex(random_bytes(16)) . "." . $allowedMimeTypes[$mimeType];
-                $workFilePath = $uploadDirectory . DIRECTORY_SEPARATOR . $workFileName;
-                if (!move_uploaded_file($upload["tmp_name"], $workFilePath)) {
-                    $qa_action_error = "The work file could not be stored. Please try again.";
-                    $workFileName = "";
-                    $workFilePath = "";
-                }
-            }
-        }
     }
 
     if ($qa_action_error === "") {
@@ -136,12 +97,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
 
             if ($department === "production") {
                 $sendToProduction = $conn->prepare(
-                    "INSERT INTO `production_incoming` (`invoice_id`, `file`) VALUES (?, ?)"
+                    "INSERT INTO `production_incoming` (`invoice_id`, `file`) VALUES (?, '')"
                 );
                 if ($sendToProduction === false) {
                     throw new mysqli_sql_exception($conn->error);
                 }
-                $sendToProduction->bind_param("ss", $invoiceId, $workFileName);
+                $sendToProduction->bind_param("s", $invoiceId);
                 if (!$sendToProduction->execute()) {
                     throw new mysqli_sql_exception($sendToProduction->error);
                 }
@@ -217,32 +178,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
                     ) {
                         throw new mysqli_sql_exception("The `invoices` and `admin_invoices` table structures do not match.");
                     }
-                    if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
-                        throw new mysqli_sql_exception("An invoice column name is invalid.");
-                    }
-                    $transferFields[] = "`" . $field . "`";
+                    $transferFields[] = $field;
                 }
                 if ($transferFields === []) {
                     throw new mysqli_sql_exception("No invoice fields are available to return to Admin.");
                 }
-                $fieldList = implode(", ", $transferFields);
-                $sendToAdmin = $conn->prepare(
-                    "INSERT INTO `admin_invoices` (" . $fieldList . ") "
-                    . "SELECT " . $fieldList . " FROM `invoices` "
-                    . "WHERE `" . $statusIdColumn . "` = ?"
+                copyInvoiceRecordIfMissing(
+                    $conn,
+                    "invoices",
+                    "admin_invoices",
+                    $statusIdColumn,
+                    $invoiceId,
+                    $transferFields
                 );
-                if ($sendToAdmin === false) {
-                    throw new mysqli_sql_exception($conn->error);
-                }
-                $sendToAdmin->bind_param("s", $invoiceId);
-                if (!$sendToAdmin->execute()) {
-                    throw new mysqli_sql_exception($sendToAdmin->error);
-                }
-                if ($sendToAdmin->affected_rows !== 1) {
-                    $sendToAdmin->close();
-                    throw new mysqli_sql_exception("The invoice was not returned to Admin.");
-                }
-                $sendToAdmin->close();
             }
 
             $markQaPassed = $conn->prepare(
@@ -297,9 +245,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
             $transactionStarted = false;
             $qa_action_success = "Invoice sent to " . $departments[$department] . ".";
             $qa_send_modal_values = ["invoice_id" => "", "department" => ""];
-            if ($department !== "production" && $workFilePath !== "" && is_file($workFilePath)) {
-                unlink($workFilePath);
-            }
         } catch (mysqli_sql_exception $exception) {
             if ($transactionStarted) {
                 try {
@@ -307,9 +252,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_qa_work"])) {
                 } catch (mysqli_sql_exception $rollbackException) {
                     error_log("Unable to roll back QA department handoff: " . $rollbackException->getMessage());
                 }
-            }
-            if ($workFilePath !== "" && is_file($workFilePath)) {
-                unlink($workFilePath);
             }
             error_log("Unable to send QA invoice: " . $exception->getMessage());
             $qa_action_error = "Invoice was not sent: " . $exception->getMessage();

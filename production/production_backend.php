@@ -9,6 +9,7 @@ if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "production") {
 }
 
 require_once "../dbconn.php";
+require_once __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "invoice_transfer.php";
 
 function getProductionInvoiceIdColumn(mysqli $conn): string
 {
@@ -42,10 +43,18 @@ $production_incoming_error = "";
 $production_working_error = "";
 $production_action_error = "";
 $production_action_success = "";
+$production_send_modal_values = [
+    "invoice_id" => "",
+    "department" => "",
+];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])) {
     $invoiceId = is_string($_POST["invoice_id"] ?? null) ? trim($_POST["invoice_id"]) : "";
     $department = is_string($_POST["department"] ?? null) ? $_POST["department"] : "";
+    $production_send_modal_values = [
+        "invoice_id" => $invoiceId,
+        "department" => $department,
+    ];
     $departmentNames = [
         "admin" => "Admin",
         "layout" => "Layout",
@@ -153,31 +162,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
                     throw new mysqli_sql_exception("No valid invoice identifier column was found.");
                 }
 
-                $quotedFields = [];
                 foreach ($transferFields as $field) {
                     if (!preg_match('/\A[A-Za-z0-9_]+\z/', $field)) {
                         throw new mysqli_sql_exception("An invoice column name is invalid.");
                     }
-                    $quotedFields[] = "`" . $field . "`";
                 }
-                $fieldList = implode(", ", $quotedFields);
-                $copyToAdmin = $conn->prepare(
-                    "INSERT INTO `admin_invoices` (" . $fieldList . ") "
-                    . "SELECT " . $fieldList . " FROM `invoices` "
-                    . "WHERE `" . $invoiceIdentifierColumn . "` = ?"
+                copyInvoiceRecordIfMissing(
+                    $conn,
+                    "invoices",
+                    "admin_invoices",
+                    $invoiceIdentifierColumn,
+                    $invoiceId,
+                    $transferFields
                 );
-                if ($copyToAdmin === false) {
-                    throw new mysqli_sql_exception($conn->error);
-                }
-                $copyToAdmin->bind_param("s", $invoiceId);
-                if (!$copyToAdmin->execute()) {
-                    throw new mysqli_sql_exception($copyToAdmin->error);
-                }
-                if ($copyToAdmin->affected_rows !== 1) {
-                    $copyToAdmin->close();
-                    throw new mysqli_sql_exception("The invoice could not be returned to Admin.");
-                }
-                $copyToAdmin->close();
             } else {
                 $destinationTable = $department === "layout"
                     ? "layout_artist_incoming"
@@ -251,6 +248,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["send_to_department"])
             }
             $transactionStarted = false;
             $production_action_success = "Invoice sent to " . $departmentNames[$department] . ".";
+            $production_send_modal_values = ["invoice_id" => "", "department" => ""];
         } catch (mysqli_sql_exception $exception) {
             if ($transactionStarted) {
                 try {

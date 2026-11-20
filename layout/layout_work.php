@@ -265,13 +265,13 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
                             <option value="production">Production</option>
                             <option value="quality assurance">Quality Assurance</option>
                         </select>
-                        <label class="form-label mt-3" for="sendWorkFile">File to send</label>
-                        <input class="form-control" type="file" name="work_file" id="sendWorkFile" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" required>
-                        <p class="work-upload-help">PDF, PNG, or JPEG · Maximum 10 MB</p>
+                        <label class="form-label mt-3" for="sendWorkFile">File to send (optional)</label>
+                        <input class="form-control" type="file" name="work_file" id="sendWorkFile" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
+                        <p class="work-upload-help">Optional PDF, PNG, or JPEG · Maximum 10 MB</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-view" data-bs-dismiss="modal">Cancel</button>
-                        <button class="btn btn-send" type="submit" name="send_work" value="1">Send file</button>
+                        <button class="btn btn-send" type="submit" name="send_work" value="1">Send work</button>
                     </div>
                 </form>
             </div>

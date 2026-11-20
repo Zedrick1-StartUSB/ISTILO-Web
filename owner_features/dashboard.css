@@ -461,20 +461,6 @@ a {
     font-size: 10px;
 }
 
-.sales-total {
-    margin-top: 15px;
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: 22px;
-}
-
-.sales-total span {
-    margin-left: 7px;
-    color: #64866d;
-    font-family: "DM Sans", "Segoe UI", sans-serif;
-    font-size: 9px;
-    font-weight: 600;
-}
-
 .chart {
     display: flex;
     height: 166px;

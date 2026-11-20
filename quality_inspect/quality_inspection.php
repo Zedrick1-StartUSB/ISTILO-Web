@@ -162,7 +162,7 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
     <div class="modal fade" id="qaSendWorkModal" tabindex="-1" aria-labelledby="qaSendWorkModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form method="post" enctype="multipart/form-data">
+                <form method="post">
                     <div class="modal-header">
                         <div>
                             <p class="overline mb-1">PASS IT ALONG</p>
@@ -180,11 +180,6 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
                             <option value="layout" <?= $qa_send_modal_values["department"] === "layout" ? "selected" : "" ?>>Layout</option>
                             <option value="production" <?= $qa_send_modal_values["department"] === "production" ? "selected" : "" ?>>Production</option>
                         </select>
-                        <div class="mt-3" id="qaWorkFileGroup" hidden>
-                            <label class="form-label" for="qaWorkFile">File to send to Production</label>
-                            <input class="form-control" type="file" name="work_file" id="qaWorkFile" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
-                            <p class="form-text mb-0">PDF, PNG, or JPEG · Maximum 10 MB</p>
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -196,7 +191,7 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
     </div>
 
     <script src="../bootstrap_template/js/bootstrap.bundle.min.js"></script>
-    <script src="quality_inspection.js"></script>
+    <script src="quality_inspection.js?v=2"></script>
     <?php if ($qa_action_error !== "" && $qa_send_modal_values["invoice_id"] !== ""): ?>
         <script>
             document.addEventListener("DOMContentLoaded", function () {

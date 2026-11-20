@@ -169,17 +169,13 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <form method="post" class="production-send-form">
-                                                <input type="hidden" name="invoice_id" value="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">
-                                                <label class="visually-hidden" for="send-department-<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>">Send invoice to department</label>
-                                                <select class="form-select form-select-sm" id="send-department-<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>" name="department" required>
-                                                    <option value="" selected disabled>Choose department</option>
-                                                    <option value="admin">Admin</option>
-                                                    <option value="layout">Layout</option>
-                                                    <option value="qa">Quality Assurance</option>
-                                                </select>
-                                                <button class="btn btn-success btn-sm" type="submit" name="send_to_department" value="1">Send</button>
-                                            </form>
+                                            <button
+                                                class="btn btn-success btn-sm"
+                                                type="button"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#productionSendWorkModal"
+                                                data-invoice="<?= htmlspecialchars((string) ($row["invoice_id"] ?? ""), ENT_QUOTES, "UTF-8") ?>"
+                                            >Send</button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -193,5 +189,68 @@ if (preg_match('/\s+(\S)/', $profileName, $profileMatches) === 1) {
             </section>
         </main>
     </div>
+    <div class="modal fade" id="productionSendWorkModal" tabindex="-1" aria-labelledby="productionSendWorkModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post">
+                    <div class="modal-header">
+                        <div>
+                            <p class="overline mb-1">PASS IT ALONG</p>
+                            <h2 class="modal-title h5 mb-0" id="productionSendWorkModalTitle">Send Production work</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input
+                            type="hidden"
+                            name="invoice_id"
+                            id="productionSendInvoiceId"
+                            value="<?= htmlspecialchars($production_send_modal_values["invoice_id"], ENT_QUOTES, "UTF-8") ?>"
+                        >
+                        <p class="mb-3">Invoice <strong id="productionSendInvoiceLabel"><?= htmlspecialchars($production_send_modal_values["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong></p>
+                        <label class="form-label" for="productionSendDepartment">Send to department</label>
+                        <select class="form-select" name="department" id="productionSendDepartment" required>
+                            <option value="" <?= $production_send_modal_values["department"] === "" ? "selected" : "" ?> disabled>Choose a department</option>
+                            <option value="admin" <?= $production_send_modal_values["department"] === "admin" ? "selected" : "" ?>>Admin</option>
+                            <option value="layout" <?= $production_send_modal_values["department"] === "layout" ? "selected" : "" ?>>Layout</option>
+                            <option value="qa" <?= $production_send_modal_values["department"] === "qa" ? "selected" : "" ?>>Quality Assurance</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success" type="submit" name="send_to_department" value="1">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="../bootstrap_template/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var sendModal = document.getElementById("productionSendWorkModal");
+            var departmentSelect = document.getElementById("productionSendDepartment");
+            sendModal.addEventListener("show.bs.modal", function (event) {
+                var trigger = event.relatedTarget;
+                if (!trigger) {
+                    return;
+                }
+
+                var invoiceId = trigger.dataset.invoice || "";
+                document.getElementById("productionSendInvoiceId").value = invoiceId;
+                document.getElementById("productionSendInvoiceLabel").textContent = invoiceId;
+                departmentSelect.value = "";
+            });
+        });
+    </script>
+    <?php if ($production_action_error !== "" && $production_send_modal_values["invoice_id"] !== ""): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var modal = document.getElementById("productionSendWorkModal");
+                if (modal) {
+                    bootstrap.Modal.getOrCreateInstance(modal).show();
+                }
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>

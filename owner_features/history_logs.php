@@ -2,9 +2,37 @@
 session_start();
 require "../logout.php";
 
-if($_SESSION["role"] != "owner"){
+if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "owner") {
     header("Location: /ISTILO_SYSTEM/Login/html/login.php");
     exit();
+}
+
+$owner_data_error = "";
+$owner_invoices = [];
+try {
+    require_once __DIR__ . DIRECTORY_SEPARATOR . "owner_backend.php";
+    $owner_invoices = ownerLoadInvoices($conn);
+} catch (mysqli_sql_exception $exception) {
+    error_log("Unable to load Owner workflow data: " . $exception->getMessage());
+    $owner_data_error = "Current workflow data could not be loaded.";
+}
+$owner_workflow_rows = [
+    "Admin" => [],
+    "Layout" => [],
+    "Production" => [],
+    "Quality Assurance" => [],
+];
+foreach ($owner_invoices as $invoice) {
+    $stage = (string) ($invoice["current_stage"] ?? "");
+    if ($stage === "Admin") {
+        $owner_workflow_rows["Admin"][] = $invoice;
+    } elseif (strpos($stage, "Layout ") === 0) {
+        $owner_workflow_rows["Layout"][] = $invoice;
+    } elseif (strpos($stage, "Production ") === 0) {
+        $owner_workflow_rows["Production"][] = $invoice;
+    } elseif (strpos($stage, "QA ") === 0 || $stage === "Ready to ship") {
+        $owner_workflow_rows["Quality Assurance"][] = $invoice;
+    }
 }
 
 ?>
@@ -22,7 +50,7 @@ if($_SESSION["role"] != "owner"){
 <body>
     <div class="dashboard-layout">
         <aside class="sidebar">
-            <a class="brand" href="dashboard.html"><span class="brand-mark">l.</span><span>little label</span></a>
+            <a class="brand" href="dashboard.php"><span class="brand-mark">l.</span><span>little label</span></a>
             <p class="nav-caption">MENU</p>
             <nav class="side-nav" aria-label="Main navigation">
                 <a class="side-link" href="dashboard.php">Dashboard</a>
@@ -40,15 +68,19 @@ if($_SESSION["role"] != "owner"){
             <header class="page-header">
                 <div>
                     <p class="today-label">SHOP MANAGEMENT</p>
-                    <h1>History logs</h1>
-                    <p class="page-subtitle">A peek at the recent updates made by each department.</p>
+                    <h1>Current workflow</h1>
+                    <p class="page-subtitle">See where each invoice is currently waiting or being worked on.</p>
                 </div>
-                <span class="subtle-badge header-badge">Sample activity</span>
+                <span class="subtle-badge header-badge">Live status</span>
             </header>
+
+            <?php if ($owner_data_error !== ""): ?>
+                <p class="alert alert-danger" role="alert"><?= htmlspecialchars($owner_data_error, ENT_QUOTES, "UTF-8") ?></p>
+            <?php endif; ?>
 
             <section class="panel page-panel history-panel" aria-labelledby="department-title">
                 <div class="panel-heading page-panel-heading">
-                    <div><h2 id="department-title">Department activity</h2><p>Showing recent activity from the selected team</p></div>
+                    <div><h2 id="department-title">Invoices by department</h2><p>These are current states, not a record of past transitions.</p></div>
                 </div>
 
                 <div class="department-tabs">
@@ -65,31 +97,82 @@ if($_SESSION["role"] != "owner"){
                     </div>
 
                     <div class="log-list log-list-admin">
-                        <article class="log-entry"><span class="log-avatar avatar-pink">JL</span><div class="log-copy"><div><strong>Jamie Lee</strong><span class="log-action">updated an order</span></div><p>Changed order <strong>#LL-1048</strong> to “Packing”.</p><small>Today · 10:42 AM</small></div><span class="log-category">Orders</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-blue">AM</span><div class="log-copy"><div><strong>Alex Morgan</strong><span class="log-action">added a team member</span></div><p>Invited Taylor Chen to the Quality Assurance department.</p><small>Today · 9:15 AM</small></div><span class="log-category">Users</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-yellow">JL</span><div class="log-copy"><div><strong>Jamie Lee</strong><span class="log-action">updated shop details</span></div><p>Changed the shop's contact email address.</p><small>Yesterday · 4:32 PM</small></div><span class="log-category">Settings</span></article>
+                        <?php if ($owner_workflow_rows["Admin"] !== []): ?>
+                            <?php foreach ($owner_workflow_rows["Admin"] as $invoice): ?>
+                                <article class="log-entry">
+                                    <span class="log-avatar avatar-pink">#</span>
+                                    <div class="log-copy">
+                                        <div><strong>Invoice #<?= htmlspecialchars((string) $invoice["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong><span class="log-action">In Admin</span></div>
+                                        <p><?= htmlspecialchars((string) ($invoice["customer_name"] ?? "Customer unavailable"), ENT_QUOTES, "UTF-8") ?> · <?= htmlspecialchars((string) ($invoice["services"] ?? "—"), ENT_QUOTES, "UTF-8") ?> · Qty <?= htmlspecialchars((string) ($invoice["quantity"] ?? "—"), ENT_QUOTES, "UTF-8") ?></p>
+                                        <small>Due <?= htmlspecialchars(ownerFormatDate($invoice["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></small>
+                                    </div>
+                                    <span class="log-category">Current</span>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="py-3 text-muted">No invoices are currently in Admin.</p>
+                        <?php endif; ?>
                     </div>
 
                     <div class="log-list log-list-layout">
-                        <article class="log-entry"><span class="log-avatar avatar-yellow">SK</span><div class="log-copy"><div><strong>Sky Kim</strong><span class="log-action">updated a product layout</span></div><p>Adjusted the placement of the logo on the Everyday Tee.</p><small>Today · 11:08 AM</small></div><span class="log-category">Products</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-lilac">DP</span><div class="log-copy"><div><strong>Drew Patel</strong><span class="log-action">uploaded a design</span></div><p>Added a new color option to the Weekend Tote product page.</p><small>Today · 9:36 AM</small></div><span class="log-category">Design</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-peach">SK</span><div class="log-copy"><div><strong>Sky Kim</strong><span class="log-action">saved a draft</span></div><p>Saved the summer collection banner for review.</p><small>Yesterday · 3:21 PM</small></div><span class="log-category">Content</span></article>
+                        <?php if ($owner_workflow_rows["Layout"] !== []): ?>
+                            <?php foreach ($owner_workflow_rows["Layout"] as $invoice): ?>
+                                <?php $stage = (string) $invoice["current_stage"]; ?>
+                                <article class="log-entry">
+                                    <span class="log-avatar avatar-yellow">#</span>
+                                    <div class="log-copy">
+                                        <div><strong>Invoice #<?= htmlspecialchars((string) $invoice["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong><span class="log-action"><?= htmlspecialchars($stage, ENT_QUOTES, "UTF-8") ?></span></div>
+                                        <p><?= htmlspecialchars((string) ($invoice["customer_name"] ?? "Customer unavailable"), ENT_QUOTES, "UTF-8") ?> · <?= htmlspecialchars((string) ($invoice["services"] ?? "—"), ENT_QUOTES, "UTF-8") ?> · Qty <?= htmlspecialchars((string) ($invoice["quantity"] ?? "—"), ENT_QUOTES, "UTF-8") ?></p>
+                                        <small>Due <?= htmlspecialchars(ownerFormatDate($invoice["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></small>
+                                    </div>
+                                    <span class="log-category">Current</span>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="py-3 text-muted">No invoices are currently in Layout.</p>
+                        <?php endif; ?>
                     </div>
 
                     <div class="log-list log-list-production">
-                        <article class="log-entry"><span class="log-avatar avatar-green">MR</span><div class="log-copy"><div><strong>Morgan Reed</strong><span class="log-action">started a production batch</span></div><p>Started 12 Everyday Tees for batch <strong>#B-208</strong>.</p><small>Today · 10:24 AM</small></div><span class="log-category">Production</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-blue">JR</span><div class="log-copy"><div><strong>Jordan Rivera</strong><span class="log-action">updated material usage</span></div><p>Recorded 6 yards of cotton jersey used for today's batch.</p><small>Today · 9:50 AM</small></div><span class="log-category">Materials</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-green">MR</span><div class="log-copy"><div><strong>Morgan Reed</strong><span class="log-action">completed a production batch</span></div><p>Marked 8 Weekend Totes ready for quality checking.</p><small>Yesterday · 4:05 PM</small></div><span class="log-category">Production</span></article>
+                        <?php if ($owner_workflow_rows["Production"] !== []): ?>
+                            <?php foreach ($owner_workflow_rows["Production"] as $invoice): ?>
+                                <?php $stage = (string) $invoice["current_stage"]; ?>
+                                <article class="log-entry">
+                                    <span class="log-avatar avatar-green">#</span>
+                                    <div class="log-copy">
+                                        <div><strong>Invoice #<?= htmlspecialchars((string) $invoice["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong><span class="log-action"><?= htmlspecialchars($stage, ENT_QUOTES, "UTF-8") ?></span></div>
+                                        <p><?= htmlspecialchars((string) ($invoice["customer_name"] ?? "Customer unavailable"), ENT_QUOTES, "UTF-8") ?> · <?= htmlspecialchars((string) ($invoice["services"] ?? "—"), ENT_QUOTES, "UTF-8") ?> · Qty <?= htmlspecialchars((string) ($invoice["quantity"] ?? "—"), ENT_QUOTES, "UTF-8") ?></p>
+                                        <small>Due <?= htmlspecialchars(ownerFormatDate($invoice["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></small>
+                                    </div>
+                                    <span class="log-category">Current</span>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="py-3 text-muted">No invoices are currently in Production.</p>
+                        <?php endif; ?>
                     </div>
 
                     <div class="log-list log-list-qa">
-                        <article class="log-entry"><span class="log-avatar avatar-lilac">TC</span><div class="log-copy"><div><strong>Taylor Chen</strong><span class="log-action">passed a quality check</span></div><p>Approved 8 Weekend Totes from batch <strong>#B-207</strong>.</p><small>Today · 11:32 AM</small></div><span class="log-category">Inspection</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-peach">AL</span><div class="log-copy"><div><strong>Alex Lopez</strong><span class="log-action">flagged an item for review</span></div><p>Set aside one sample with an uneven hem for a second look.</p><small>Today · 10:02 AM</small></div><span class="log-category">Inspection</span></article>
-                        <article class="log-entry"><span class="log-avatar avatar-lilac">TC</span><div class="log-copy"><div><strong>Taylor Chen</strong><span class="log-action">completed a product check</span></div><p>Checked stitching and labels on the new Everyday Tee batch.</p><small>Yesterday · 2:47 PM</small></div><span class="log-category">Inspection</span></article>
+                        <?php if ($owner_workflow_rows["Quality Assurance"] !== []): ?>
+                            <?php foreach ($owner_workflow_rows["Quality Assurance"] as $invoice): ?>
+                                <?php $stage = (string) $invoice["current_stage"]; ?>
+                                <article class="log-entry">
+                                    <span class="log-avatar avatar-lilac">#</span>
+                                    <div class="log-copy">
+                                        <div><strong>Invoice #<?= htmlspecialchars((string) $invoice["invoice_id"], ENT_QUOTES, "UTF-8") ?></strong><span class="log-action"><?= htmlspecialchars($stage, ENT_QUOTES, "UTF-8") ?></span></div>
+                                        <p><?= htmlspecialchars((string) ($invoice["customer_name"] ?? "Customer unavailable"), ENT_QUOTES, "UTF-8") ?> · <?= htmlspecialchars((string) ($invoice["services"] ?? "—"), ENT_QUOTES, "UTF-8") ?> · Qty <?= htmlspecialchars((string) ($invoice["quantity"] ?? "—"), ENT_QUOTES, "UTF-8") ?></p>
+                                        <small>Due <?= htmlspecialchars(ownerFormatDate($invoice["completion_date"] ?? ""), ENT_QUOTES, "UTF-8") ?></small>
+                                    </div>
+                                    <span class="log-category">Current</span>
+                                </article>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="py-3 text-muted">No invoices are currently in Quality Assurance or ready to ship.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </section>
-            <p class="sample-note">These entries are example UI content and are not connected to a live activity database.</p>
+            <p class="sample-note">Department timestamps are not stored, so this page shows current invoice locations rather than past activity.</p>
             <footer class="dashboard-footer">Made with care at little label <span aria-hidden="true">♡</span></footer>
         </main>
     </div>
