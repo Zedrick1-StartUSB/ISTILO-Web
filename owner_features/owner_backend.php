@@ -77,6 +77,15 @@ function ownerLoadInvoices(mysqli $conn): array
     );
 }
 
+function ownerLoadHistoryLogs(mysqli $conn): array
+{
+    return ownerFetchAllRows(
+        $conn,
+        "SELECT `invoice_id`, `customer_name`, `qty`, `updated_dept` "
+        . "FROM `history_logs` ORDER BY `invoice_id` DESC, `updated_dept` ASC"
+    );
+}
+
 function ownerLoadInvoiceTableRows(mysqli $conn): array
 {
     return ownerFetchAllRows(

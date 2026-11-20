@@ -40,20 +40,7 @@ $user_role_labels = [
 </head>
 <body>
     <div class="dashboard-layout">
-        <aside class="sidebar">
-            <a class="brand" href="dashboard.php"><span class="brand-mark">l.</span><span>little label</span></a>
-            <p class="nav-caption">MENU</p>
-            <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link" href="dashboard.php">Dashboard</a>
-                <a class="side-link" href="orders.php">Orders</a>
-                <a class="side-link" href="materials.php">Materials</a>
-                <a class="side-link active" href="users.php" aria-current="page">Users</a>
-                <a class="side-link" href="history_logs.php">History Logs</a>
-                <form method="POST">
-                    <button class="btn btn-danger" name="logout">Logout</button>
-                </form>
-            </nav>
-        </aside>
+        <?php $owner_active_page = "users"; require __DIR__ . DIRECTORY_SEPARATOR . "owner_sidebar.php"; ?>
 
         <main class="main-content">
             <header class="page-header">

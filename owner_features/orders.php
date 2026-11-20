@@ -32,20 +32,7 @@ $owner_invoice_metrics = ownerBuildInvoiceMetrics($owner_orders);
 </head>
 <body>
     <div class="dashboard-layout">
-        <aside class="sidebar">
-            <a class="brand" href="dashboard.php"><span class="brand-mark">l.</span><span>little label</span></a>
-            <p class="nav-caption">MENU</p>
-            <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link" href="dashboard.php">Dashboard</a>
-                <a class="side-link active" href="orders.php" aria-current="page">Orders</a>
-                <a class="side-link" href="materials.php">Materials</a>
-                <a class="side-link" href="users.php">Users</a>
-                <a class="side-link" href="history_logs.php">History Logs</a>
-                <form method="POST">
-                    <button class="btn btn-danger" name="logout">Logout</button>
-                </form>
-            </nav>
-        </aside>
+        <?php $owner_active_page = "orders"; require __DIR__ . DIRECTORY_SEPARATOR . "owner_sidebar.php"; ?>
 
         <main class="main-content">
             <header class="page-header">

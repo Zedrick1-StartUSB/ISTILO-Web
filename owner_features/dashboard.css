@@ -46,23 +46,30 @@ a {
 .brand {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    width: fit-content;
-    margin: 0 0 47px 5px;
-    font-size: 16px;
+    gap: 10px;
+    width: 100%;
+    margin: 0 0 32px;
+    padding: 10px 9px;
+    border: 1px solid #eee6de;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #f8eee8, #f7f6f0);
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
 
 .brand-mark {
     display: grid;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
+    flex: 0 0 35px;
     place-items: center;
-    border: 1px solid var(--ink);
+    border: 1px solid #a96059;
     border-radius: 50%;
+    background: #a96059;
+    color: #fffefa;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 18px;
+    font-size: 19px;
 }
 
 .nav-caption {
@@ -76,6 +83,49 @@ a {
 .side-nav {
     display: grid;
     gap: 5px;
+}
+
+.owner-logout {
+    width: 100%;
+    margin-top: auto;
+    padding-bottom: 10px;
+}
+
+.owner-logout > .btn {
+    width: 100%;
+}
+
+.owner-profile {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 9px;
+    padding: 10px;
+    border: 1px solid #eee6de;
+    border-radius: 11px;
+    background: #fbf8f2;
+}
+
+.owner-profile-copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.owner-profile-copy strong,
+.owner-profile-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.owner-profile-copy strong {
+    font-size: 11px;
+}
+
+.owner-profile-copy small {
+    color: var(--muted);
+    font-size: 9px;
 }
 
 .side-link {
@@ -728,8 +778,7 @@ a {
     }
 
     .nav-caption,
-    .sidebar-note,
-    .profile-link {
+    .sidebar-note {
         display: none;
     }
 
@@ -745,6 +794,20 @@ a {
         gap: 6px;
         padding: 0 9px;
         font-size: 10px;
+    }
+
+    .owner-logout {
+        width: auto;
+        margin-top: 10px;
+        padding: 0;
+    }
+
+    .owner-logout > .btn {
+        width: auto;
+    }
+
+    .owner-profile {
+        margin-top: 10px;
     }
 
     .nav-icon {

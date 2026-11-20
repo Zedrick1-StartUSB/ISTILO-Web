@@ -41,24 +41,7 @@ $owner_first_name = preg_split('/\s+/', $owner_name)[0] ?? "Owner";
 </head>
 <body>
     <div class="dashboard-layout">
-        <aside class="sidebar">
-            <a class="brand" href="dashboard.php" aria-label="little label dashboard home">
-                <span class="brand-mark">l.</span>
-                <span>little label</span>
-            </a>
-
-            <p class="nav-caption">MENU</p>
-            <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link active" href="dashboard.php" aria-current="page">Dashboard</a>
-                <a class="side-link" href="orders.php">Orders</a>
-                <a class="side-link" href="materials.php">Materials</a>
-                <a class="side-link" href="users.php">Users</a>
-                <a class="side-link" href="history_logs.php">History Logs</a>
-                <form method="POST">
-                    <button class="btn btn-danger" name="logout">Logout</button>
-                </form>
-            </nav>
-        </aside>
+        <?php $owner_active_page = "dashboard"; require __DIR__ . DIRECTORY_SEPARATOR . "owner_sidebar.php"; ?>
 
         <main class="main-content" id="overview">
             <header class="topbar">
